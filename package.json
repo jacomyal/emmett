@@ -1,0 +1,33 @@
+{
+  "name": "emmett",
+  "version": "1.0.0",
+  "description": "A custom events emitter for Node.js and the browser",
+  "main": "emmett.js",
+  "scripts": {
+    "test": "gulp test",
+    "build": "gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jacomyal/emmett"
+  },
+  "keywords": [
+    "events"
+  ],
+  "author": "Alexis Jacomy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jacomyal/emmett/issues"
+  },
+  "homepage": "https://github.com/jacomyal/emmett",
+  "devDependencies": {
+    "gulp": "^3.8.9",
+    "gulp-browserify": "^0.5.0",
+    "gulp-header": "^1.2.2",
+    "gulp-jshint": "^1.8.6",
+    "gulp-mocha": "^1.1.1",
+    "gulp-mocha-phantomjs": "^0.5.1",
+    "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^1.0.1"
+  }
+}

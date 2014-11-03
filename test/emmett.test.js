@@ -30,6 +30,21 @@ describe('Emitter', function() {
       e.emit('myEvent');
       assert.strictEqual(count, 3);
     });
+
+    it('dispatching an event should fire a once handler only once.', function() {
+      e.once('onceEvent', callback);
+      e.emit('onceEvent');
+      e.emit('onceEvent');
+      assert.strictEqual(count, 4);
+    });
+
+    it('combinaisons of on and once should work properly.', function() {
+      e.once('comboEvent', callback);
+      e.on('comboEvent', callback);
+      e.emit('comboEvent');
+      e.emit('comboEvent');
+      assert.strictEqual(count, 7);
+    });
   });
 
   describe('api', function() {
@@ -118,6 +133,23 @@ describe('Binder', function() {
       binder.on('myEvent2', callback2);
       e.emit('myEvent2');
       assert.strictEqual(count2, 1);
+    });
+
+    it('binder.once binds functions to the related e but fire only once.', function() {
+      count1 = 0;
+      binder.once('onceEvent', callback1);
+      e.emit('onceEvent');
+      e.emit('onceEvent');
+      assert.strictEqual(count1, 1);
+    });
+
+    it('binder.on and binder.once combinaisons should work properly.', function() {
+      count1 = 0;
+      binder.once('comboEvent', callback1);
+      binder.on('comboEvent', callback1);
+      e.emit('comboEvent');
+      e.emit('comboEvent');
+      assert.strictEqual(count1, 3);
     });
 
     it('binder.off unbinds functions from the related e.', function() {

@@ -58,18 +58,29 @@
    * @param  {function} handler The function to bind to every events.
    * @return {Emitter}          Returns this.
    */
-  Emitter.prototype.on = function(events, handler) {
+  Emitter.prototype.on = function(events, handler, onlyOnce) {
     var i,
         l,
         event,
-        eArray;
+        eArray,
+        last = arguments[arguments.length - 1];
+
+    // Dealing with once polymorphism
+    // NOTE: this is hardly clean
+    if (typeof last === 'boolean') {
+      onlyOnce = last;
+      arguments.length--;
+    }
+    else {
+      onlyOnce = false;
+    }
 
     if (
       arguments.length === 1 &&
       typeof arguments[0] === 'object'
     )
       for (event in arguments[0])
-        Emitter.prototype.on.call(this, event, arguments[0][event]);
+        Emitter.prototype.on.call(this, event, arguments[0][event], onlyOnce);
 
     else if (
       arguments.length === 1 &&
@@ -100,6 +111,7 @@
         // Using an object instead of directly the handler will make possible
         // later to add flags
         this._handlers[event].push({
+          once: !!onlyOnce,
           handler: handler
         });
       }
@@ -108,6 +120,49 @@
       throw new Error('Wrong arguments.');
 
     return this;
+  };
+
+
+  /**
+   * This method is basically the same as `on` but comes with a notable
+   * difference: the handler will fire only once, the first time a relevant
+   * event is emitted and will be removed immediately after.
+   *
+   * Variant 1:
+   * **********
+   * > myEmitter.once('myEvent', function(e) { console.log(e); });
+   *
+   * @param  {string}   event   The event to listen to.
+   * @param  {function} handler The function to bind.
+   * @return {Emitter}          Returns this.
+   *
+   * Variant 2:
+   * **********
+   * > myEmitter.once(['myEvent1', 'myEvent2'], function(e) { console.log(e); });
+   *
+   * @param  {array}    events  The events to listen to.
+   * @param  {function} handler The function to bind.
+   * @return {Emitter}          Returns this.
+   *
+   * Variant 3:
+   * **********
+   * > myEmitter.once({
+   * >   myEvent1: function(e) { console.log(e); },
+   * >   myEvent2: function(e) { console.log(e); }
+   * > });
+   *
+   * @param  {object} bindings An object containing pairs event / function.
+   * @return {Emitter}         Returns this.
+   *
+   * Variant 4:
+   * **********
+   * > myEmitter.once(function(e) { console.log(e); });
+   *
+   * @param  {function} handler The function to bind to every events.
+   * @return {Emitter}          Returns this.
+   */
+  Emitter.prototype.once = function(events, handler) {
+    return this.on(events, handler, true);
   };
 
 
@@ -159,7 +214,7 @@
    * @param  {function} handler The function to unbind to every events.
    * @return {Emitter}          Returns this.
    */
-  Emitter.prototype.off = function(events, handler) {
+  Emitter.prototype.off = function(events, handler, onlyOnce) {
     var i,
         n,
         j,
@@ -167,9 +222,20 @@
         k,
         a,
         event,
+        last = arguments[arguments.length - 1],
         eArray = typeof events === 'string' ?
           [events] :
           events;
+
+    // Dealing with once polymorphism
+    // NOTE: this is hardly clean
+    if (typeof last === 'boolean') {
+      onlyOnce = last;
+      arguments.length--;
+    }
+    else {
+      onlyOnce = false;
+    }
 
     if (!arguments.length) {
       this._handlersAll = [];
@@ -205,9 +271,11 @@
         event = eArray[i];
         if (this._handlers[event]) {
           a = [];
-          for (j = 0, m = this._handlers[event].length; j !== m; j += 1)
-            if (this._handlers[event][j].handler !== handler)
+          for (j = 0, m = this._handlers[event].length; j !== m; j += 1) {
+            if (this._handlers[event][j].handler !== handler ||
+                (onlyOnce && !this._handlers[event][j].once))
               a.push(this._handlers[event][j]);
+          }
 
           this._handlers[event] = a;
         }
@@ -241,7 +309,6 @@
         n,
         j,
         m,
-        a,
         event,
         handlers,
         eventName,
@@ -262,15 +329,14 @@
           data: data || {},
           target: this
         };
-        a = [];
 
         for (j = 0, m = handlers.length; j !== m; j += 1) {
           handlers[j].handler(event);
-          if (!handlers[j].one)
-            a.push(handlers[j]);
-        }
 
-        this._handlers[eventName] = a;
+          // Removing handler if once
+          if (handlers[j].once)
+            this.off(eventName, handlers[j].handler, true);
+        }
       }
     }
 
@@ -336,6 +402,30 @@
     // Actually send the bindings to the parent emitter if the binder is on:
     if (this._enabled)
       this._emitter.on.apply(this._emitter, arguments);
+
+    return this;
+  };
+
+
+  /**
+   * This method registers the pairs event(s) / function in the binder, and
+   * binds them to the emitter if the binder is activated.
+   *
+   * The only difference with Binder.prototype.on is that the handler will
+   * only be fired the first time the relevant event is emitted.
+   *
+   * The polymorphism is exactly the one from Emitter.prototype.on.
+   */
+  Binder.prototype.once = function() {
+    var args = Array.prototype.slice.call(arguments);
+    args.push(true);
+
+    // Store the bindings as if it were an emitter:
+    Emitter.prototype.on.apply(this, args);
+
+    // Actually send the bindings to the parent emitter if the binder is on:
+    if (this._enabled)
+      this._emitter.on.apply(this._emitter, args);
 
     return this;
   };

@@ -265,7 +265,7 @@
         a = [];
 
         for (j = 0, m = handlers.length; j !== m; j += 1) {
-          handlers[j].handler(event);
+          handlers[j].handler.call(this, event);
           if (!handlers[j].one)
             a.push(handlers[j]);
         }

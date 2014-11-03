@@ -331,7 +331,7 @@
         };
 
         for (j = 0, m = handlers.length; j !== m; j += 1) {
-          handlers[j].handler(event);
+          handlers[j].handler.call(this, event);
 
           // Removing handler if once
           if (handlers[j].once)

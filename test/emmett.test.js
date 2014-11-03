@@ -45,6 +45,15 @@ describe('Emitter', function() {
       e.emit('comboEvent');
       assert.strictEqual(count, 7);
     });
+
+    it('handlers should be fired using the emitter\'s scope.', function() {
+      e.on('initEvent', function() {
+        this.emit('scopeEvent');
+      });
+      e.on('scopeEvent', callback);
+      e.emit('initEvent');
+      assert.strictEqual(count, 8);
+    });
   });
 
   describe('api', function() {

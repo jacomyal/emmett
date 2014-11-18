@@ -1,4 +1,4 @@
-;(function() {
+(function() {
   'use strict';
 
 
@@ -22,8 +22,8 @@
    * suite of events. So, these functions will be executed anytime one related
    * event is emitted.
    *
-   * It is also possible to bind a function to any emitted event by not specifying
-   * any event to bind the function to.
+   * It is also possible to bind a function to any emitted event by not
+   * specifying any event to bind the function to.
    *
    * Variant 1:
    * **********
@@ -113,9 +113,9 @@
 
   /**
    * This method unbinds one or more functions from events of the emitter. So,
-   * these functions will no more be executed when the related events are emitted.
-   * If the functions were not bound to the events, nothing will happen, and no
-   * error will be thrown.
+   * these functions will no more be executed when the related events are
+   * emitted. If the functions were not bound to the events, nothing will
+   * happen, and no error will be thrown.
    *
    * Variant 1:
    * **********
@@ -204,9 +204,9 @@
 
   /**
    * This method unbinds every handlers attached to every or any events. So,
-   * these functions will no more be executed when the related events are emitted.
-   * If the functions were not bound to the events, nothing will happen, and no
-   * error will be thrown.
+   * these functions will no more be executed when the related events are
+   * emitted. If the functions were not bound to the events, nothing will
+   * happen, and no error will be thrown.
    *
    * Usage:
    * ******
@@ -346,7 +346,7 @@
 
 
   /**
-   * This method unregister the pairs event(s) / function from the binder, and
+   * This method unregister some pairs event(s) / function from the binder, and
    * unbinds them from the emitter if the binder is activated.
    *
    * The polymorphism is exactly the one from Emitter.prototype.off.
@@ -415,8 +415,8 @@
 
 
   /**
-   * If the binder if enabled, this method will disable it and unbind each stored
-   * event(s) / function pair from the emitter.
+   * If the binder if enabled, this method will disable it and unbind each
+   * stored event(s) / function pair from the emitter.
    *
    * @return {Binder} Returns this.
    */

@@ -117,28 +117,19 @@
    * If the functions were not bound to the events, nothing will happen, and no
    * error will be thrown.
    *
-   * It is also possible to unbind a function from every AND any emitted event by
-   * not specifying any event to bind the function to.
-   *
    * Variant 1:
    * **********
-   * > myEmitter.off('myEvent');
+   * > myEmitter.off('myEvent', myHandler);
    *
-   * @param  {string} event The event to unbind.
-   * @return {Emitter}      Returns this.
-   *
-   * Variant 1:
-   * **********
-   * > myEmitter.off(['myEvent1', 'myEvent2']);
-   *
-   * @param  {array} events The events to unbind.
-   * @return {Emitter}      Returns this.
+   * @param  {string}   event   The event to unbind the handler from.
+   * @param  {function} handler The function to unbind.
+   * @return {Emitter}          Returns this.
    *
    * Variant 2:
    * **********
    * > myEmitter.off(['myEvent1', 'myEvent2'], myHandler);
    *
-   * @param  {array}    events  The events to unbind to.
+   * @param  {array}    events  The events to unbind the handler from.
    * @param  {function} handler The function to unbind.
    * @return {Emitter}          Returns this.
    *
@@ -156,7 +147,7 @@
    * **********
    * > myEmitter.off(myHandler);
    *
-   * @param  {function} handler The function to unbind to every events.
+   * @param  {function} handler The function to unbind from every events.
    * @return {Emitter}          Returns this.
    */
   Emitter.prototype.off = function(events, handler) {
@@ -171,17 +162,7 @@
           [events] :
           events;
 
-    if (!arguments.length) {
-      this._handlersAll = [];
-      for (k in this._handlers)
-        delete this._handlers[k];
-    }
-
-    else if (arguments.length === 1 && typeof eArray !== 'function')
-      for (i = 0, n = eArray.length; i !== n; i += 1)
-        delete this._handlers[eArray[i]];
-
-    else if (arguments.length === 1 && typeof eArray === 'function') {
+    if (arguments.length === 1 && typeof eArray === 'function') {
       handler = arguments[0];
 
       // Handlers bound to events:
@@ -216,6 +197,29 @@
           delete this._handlers[event];
       }
     }
+
+    return this;
+  };
+
+
+  /**
+   * This method unbinds every handlers attached to every or any events. So,
+   * these functions will no more be executed when the related events are emitted.
+   * If the functions were not bound to the events, nothing will happen, and no
+   * error will be thrown.
+   *
+   * Usage:
+   * ******
+   * > myEmitter.unbindAll();
+   *
+   * @return {Emitter}      Returns this.
+   */
+  Emitter.prototype.unbindAll = function() {
+    var k;
+
+    this._handlersAll = [];
+    for (k in this._handlers)
+      delete this._handlers[k];
 
     return this;
   };
@@ -354,6 +358,24 @@
     // Actually send the bindings to the parent emitter if the binder is on:
     if (this._enabled)
       this._emitter.off.apply(this._emitter, arguments);
+
+    return this;
+  };
+
+
+  /**
+   * This method unregister all the pairs event(s) / function from the binder,
+   * and unbinds them from the emitter if the binder is activated.
+   *
+   * The polymorphism is exactly the one from Emitter.prototype.unbindAll.
+   */
+  Binder.prototype.unbindAll = function() {
+    // Store the bindings as if it were an emitter:
+    Emitter.prototype.unbindAll.apply(this, arguments);
+
+    // Actually send the bindings to the parent emitter if the binder is on:
+    if (this._enabled)
+      this._emitter.unbindAll.apply(this._emitter, arguments);
 
     return this;
   };

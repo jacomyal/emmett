@@ -49,12 +49,7 @@ describe('Emitter', function() {
       assert.strictEqual(count, 0);
 
       e.on('myEvent', callback);
-      e.off('myEvent');
-      e.emit('myEvent');
-      assert.strictEqual(count, 0);
-
-      e.on('myEvent', callback);
-      e.off();
+      e.unbindAll();
       e.emit('myEvent');
       assert.strictEqual(count, 0);
     });
@@ -69,21 +64,21 @@ describe('Emitter', function() {
       e.on('myEvent1', callback1);
       e.emit('myEvent1');
       assert.strictEqual(count1, 1);
-      e.off();
+      e.unbindAll();
       count1 = 0;
 
       e.on(['myEvent1', 'myEvent2'], callback1);
       e.emit('myEvent1');
       e.emit('myEvent2');
       assert.strictEqual(count1, 2);
-      e.off();
+      e.unbindAll();
       count1 = 0;
 
       e.on(callback1);
       e.emit('myEvent1');
       e.emit('myEvent2');
       assert.deepEqual([count1, count2], [2, 0]);
-      e.off();
+      e.unbindAll();
       count1 = 0;
       count2 = 0;
 
@@ -91,7 +86,7 @@ describe('Emitter', function() {
       e.emit('myEvent1');
       e.emit('myEvent2');
       assert.deepEqual([count1, count2], [1, 1]);
-      e.off();
+      e.unbindAll();
       count1 = 0;
       count2 = 0;
     });
@@ -160,12 +155,7 @@ describe('Binder', function() {
       assert.strictEqual(count, 0);
 
       binder.on('myEvent', callback);
-      binder.off('myEvent');
-      e.emit('myEvent');
-      assert.strictEqual(count, 0);
-
-      binder.on('myEvent', callback);
-      binder.off();
+      binder.unbindAll();
       e.emit('myEvent');
       assert.strictEqual(count, 0);
     });
@@ -181,21 +171,21 @@ describe('Binder', function() {
       binder.on('myEvent1', callback1);
       e.emit('myEvent1');
       assert.strictEqual(count1, 1);
-      binder.off();
+      binder.unbindAll();
       count1 = 0;
 
       binder.on(['myEvent1', 'myEvent2'], callback1);
       e.emit('myEvent1');
       e.emit('myEvent2');
       assert.strictEqual(count1, 2);
-      binder.off();
+      binder.unbindAll();
       count1 = 0;
 
       binder.on(callback1);
       e.emit('myEvent1');
       e.emit('myEvent2');
       assert.deepEqual([count1, count2], [2, 0]);
-      binder.off();
+      binder.unbindAll();
       count1 = 0;
       count2 = 0;
 
@@ -203,7 +193,7 @@ describe('Binder', function() {
       e.emit('myEvent1');
       e.emit('myEvent2');
       assert.deepEqual([count1, count2], [1, 1]);
-      binder.off();
+      binder.unbindAll();
       count1 = 0;
       count2 = 0;
     });

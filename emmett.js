@@ -470,7 +470,7 @@
   /**
    * Version:
    */
-  Emitter.version = '1.0.0';
+  Emitter.version = '2.0.0';
 
 
   // Export:

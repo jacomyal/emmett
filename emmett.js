@@ -261,6 +261,10 @@
           [events] :
           events;
 
+    // Check that the emitter is enabled:
+    if (!this._enabled)
+      return this;
+
     data = data === undefined ? {} : data;
 
     for (i = 0, n = eArray.length; i !== n; i += 1) {

@@ -11,18 +11,21 @@ describe('Emitter', function() {
 
     it('dispatching an event with no trigger does nothing', function() {
       e.emit('myEvent');
-      assert.strictEqual(count, 0);
+      assert.equal(count, 0);
+      count = 0;
     });
 
     it('dispatching an event with a trigger executes the callback', function() {
       e.on('myEvent', callback);
       e.emit('myEvent');
-      assert.strictEqual(count, 1);
+      assert.equal(count, 1);
+      count = 0;
     });
 
-    it('dispatching an event with a trigger executes the callback', function() {
+    it('data should effectively be given to the callback', function() {
       e.emit('myEvent', { count: 2 });
-      assert.strictEqual(count, 3);
+      assert.equal(count, 2);
+      count = 0;
     });
 
     it('dispatching an event with a trigger than has been unbound does nothing', function() {
@@ -41,17 +44,17 @@ describe('Emitter', function() {
       e.on('myEvent', callback);
       e.off('myEvent', callback);
       e.emit('myEvent');
-      assert.strictEqual(count, 0);
+      assert.equal(count, 0);
 
       e.on('myEvent', callback);
       e.off(['myEvent', 'anotherEvent'], callback);
       e.emit('myEvent');
-      assert.strictEqual(count, 0);
+      assert.equal(count, 0);
 
       e.on('myEvent', callback);
       e.unbindAll();
       e.emit('myEvent');
-      assert.strictEqual(count, 0);
+      assert.equal(count, 0);
     });
 
     it('bind polymorphisms should work', function() {
@@ -63,14 +66,14 @@ describe('Emitter', function() {
 
       e.on('myEvent1', callback1);
       e.emit('myEvent1');
-      assert.strictEqual(count1, 1);
+      assert.equal(count1, 1);
       e.unbindAll();
       count1 = 0;
 
       e.on(['myEvent1', 'myEvent2'], callback1);
       e.emit('myEvent1');
       e.emit('myEvent2');
-      assert.strictEqual(count1, 2);
+      assert.equal(count1, 2);
       e.unbindAll();
       count1 = 0;
 
@@ -97,11 +100,11 @@ describe('Emitter', function() {
           e = (new emitter()).on('myEvent', callback);
 
       e.emit('myEvent');
-      assert(count === 1);
+      assert.equal(count, 1);
 
       e.kill();
       e.emit('myEvent');
-      assert(count === 1);
+      assert.equal(count, 1);
 
       assert.throws(function() { e.child(); });
       assert.throws(function() { e.on('myEvent', callback) });
@@ -117,13 +120,13 @@ describe('Emitter', function() {
     it('should stop emiting events when disabled', function() {
       e.disable();
       e.emit('myEvent');
-      assert(count === 0);
+      assert.equal(count, 0);
     });
 
     it('should start emiting events again when enabled back', function() {
       e.enable();
       e.emit('myEvent');
-      assert(count === 1);
+      assert.equal(count, 1);
     });
   });
 });
@@ -142,40 +145,40 @@ describe('Children', function() {
 
     it('should propagate from parents to children', function() {
       e1.emit('myEvent');
-      assert(count1 === 1);
-      assert(count2 === 1);
-      assert(count3 === 1);
+      assert.equal(count1, 1);
+      assert.equal(count2, 1);
+      assert.equal(count3, 1);
       count1 = count2 = count3 = 0;
 
       e2.emit('myEvent');
-      assert(count1 === 0);
-      assert(count2 === 1);
-      assert(count3 === 1);
+      assert.equal(count1, 0);
+      assert.equal(count2, 1);
+      assert.equal(count3, 1);
       count1 = count2 = count3 = 0;
     });
 
     it('should stop propagation when a child is disabled', function() {
       e1.disable();
       e1.emit('myEvent');
-      assert(count1 === 0);
-      assert(count2 === 0);
-      assert(count3 === 0);
+      assert.equal(count1, 0);
+      assert.equal(count2, 0);
+      assert.equal(count3, 0);
       count1 = count2 = count3 = 0;
 
       e1.enable();
       e2.disable();
       e1.emit('myEvent');
-      assert(count1 === 1);
-      assert(count2 === 0);
-      assert(count3 === 0);
+      assert.equal(count1, 1);
+      assert.equal(count2, 0);
+      assert.equal(count3, 0);
       count1 = count2 = count3 = 0;
 
       e2.enable();
       e3.disable();
       e1.emit('myEvent');
-      assert(count1 === 1);
-      assert(count2 === 1);
-      assert(count3 === 0);
+      assert.equal(count1, 1);
+      assert.equal(count2, 1);
+      assert.equal(count3, 0);
       count1 = count2 = count3 = 0;
     });
   });

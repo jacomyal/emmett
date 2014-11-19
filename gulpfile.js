@@ -1,9 +1,10 @@
 var gulp = require('gulp'),
     mocha = require('gulp-mocha'),
-    jshint = require('gulp-jshint'),
     uglify = require('gulp-uglify'),
     rename = require('gulp-rename'),
     header = require('gulp-header'),
+    jshint = require('gulp-jshint'),
+    gjslint = require('gulp-gjslint'),
     browserify = require('gulp-browserify'),
     phantom = require('gulp-mocha-phantomjs');
 
@@ -14,16 +15,20 @@ var indexFile = './emmett.js';
 gulp.task('lint', function() {
   // Linting configurations
   var jshintConfig = {
-    '-W055': true,
-    '-W040': true,
-    '-W064': true,
-    node: true,
-    browser: true
-  };
+        '-W040': true,
+        node: true,
+        browser: true
+      },
+      gjslintConfig = {
+        flags: ['--nojsdoc', '--disable 211,212']
+      };
 
   return gulp.src(indexFile)
     .pipe(jshint(jshintConfig))
-    .pipe(jshint.reporter('default'));
+    .pipe(jshint.reporter('jshint-stylish'))
+    .pipe(jshint.reporter('fail'))
+    .pipe(gjslint(gjslintConfig))
+    .pipe(gjslint.reporter('console'), {fail: true});
 });
 
 gulp.task('build', function() {

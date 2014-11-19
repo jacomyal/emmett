@@ -31,7 +31,17 @@ describe('Emitter', function() {
     it('dispatching an event with a trigger than has been unbound does nothing', function() {
       e.off('myEvent', callback);
       e.emit('myEvent');
-      assert.strictEqual(count, 3);
+      assert.equal(count, 0);
+      count = 0;
+    });
+
+    it('binding a function with "once" set to true should work only once', function() {
+      e.once('myEvent', callback);
+      e.emit('myEvent');
+      assert.equal(count, 1);
+      e.emit('myEvent');
+      assert.equal(count, 1);
+      count = 0;
     });
   });
 
@@ -92,6 +102,14 @@ describe('Emitter', function() {
       e.unbindAll();
       count1 = 0;
       count2 = 0;
+    });
+
+    it('giving unrecognized parameters should throw an error', function() {
+      var count = 0,
+          callback = function() { count++; },
+          e = new emitter();
+
+      assert.throws(function() { e.on('myEvent', callback, { blabla: 42 }) });
     });
 
     it('killing an instance should work', function() {

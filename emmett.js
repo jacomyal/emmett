@@ -1,6 +1,14 @@
 (function() {
   'use strict';
 
+  /**
+   * Here is the list of every allowed parameter when using Emitter#on:
+   * @type {Object}
+   */
+  var __allowedOptions = {
+    once: 'boolean'
+  };
+
 
   /**
    * The emitter's constructor. It initializes the handlers-per-events store and
@@ -27,20 +35,38 @@
    * It is also possible to bind a function to any emitted event by not
    * specifying any event to bind the function to.
    *
+   * Recognized options:
+   * *******************
+   *  - {?boolean} once   If true, the handlers will be unbound after the first
+   *                      execution. Default value: false.
+   *
    * Variant 1:
    * **********
    * > myEmitter.on('myEvent', function(e) { console.log(e); });
+   * > // Or:
+   * > myEmitter.on('myEvent', function(e) { console.log(e); }, { once: true });
    *
    * @param  {string}   event   The event to listen to.
    * @param  {function} handler The function to bind.
+   * @param  {?object}  options Eventually some options.
    * @return {Emitter}          Returns this.
    *
    * Variant 2:
    * **********
-   * > myEmitter.on(['myEvent1', 'myEvent2'], function(e) { console.log(e); });
+   * > myEmitter.on(
+   * >   ['myEvent1', 'myEvent2'],
+   * >   function(e) { console.log(e); }
+   * >);
+   * > // Or:
+   * > myEmitter.on(
+   * >   ['myEvent1', 'myEvent2'],
+   * >   function(e) { console.log(e); }
+   * >   { once: true }}
+   * >);
    *
    * @param  {array}    events  The events to listen to.
    * @param  {function} handler The function to bind.
+   * @param  {?object}  options Eventually some options.
    * @return {Emitter}          Returns this.
    *
    * Variant 3:
@@ -49,45 +75,39 @@
    * >   myEvent1: function(e) { console.log(e); },
    * >   myEvent2: function(e) { console.log(e); }
    * > });
+   * > // Or:
+   * > myEmitter.on({
+   * >   myEvent1: function(e) { console.log(e); },
+   * >   myEvent2: function(e) { console.log(e); }
+   * > }, { once: true });
    *
-   * @param  {object} bindings An object containing pairs event / function.
-   * @return {Emitter}         Returns this.
+   * @param  {object}  bindings An object containing pairs event / function.
+   * @param  {?object}  options Eventually some options.
+   * @return {Emitter}          Returns this.
    *
    * Variant 4:
    * **********
    * > myEmitter.on(function(e) { console.log(e); });
+   * > // Or:
+   * > myEmitter.on(function(e) { console.log(e); }, { once: true});
    *
    * @param  {function} handler The function to bind to every events.
+   * @param  {?object}  options Eventually some options.
    * @return {Emitter}          Returns this.
    */
-  Emitter.prototype.on = function(events, handler) {
+  Emitter.prototype.on = function(a, b, c) {
     var i,
         l,
+        k,
         event,
-        eArray;
+        eArray,
+        bindingObject;
 
-    if (
-      arguments.length === 1 &&
-      typeof arguments[0] === 'object'
-    )
-      for (event in arguments[0])
-        Emitter.prototype.on.call(this, event, arguments[0][event]);
-
-    else if (
-      arguments.length === 1 &&
-      typeof arguments[0] === 'function'
-    )
-      this._handlersAll.push({
-        handler: arguments[0]
-      });
-
-    else if (
-      arguments.length === 2 &&
-      typeof arguments[1] === 'function'
-    ) {
-      eArray = typeof events === 'string' ?
-        [events] :
-        events;
+    // Variant 1 and 2:
+    if (typeof b === 'function') {
+      eArray = typeof a === 'string' ?
+        [a] :
+        a;
 
       for (i = 0, l = eArray.length; i !== l; i += 1) {
         event = eArray[i];
@@ -99,16 +119,96 @@
         if (!this._handlers[event])
           this._handlers[event] = [];
 
-        // Using an object instead of directly the handler will make possible
-        // later to add flags
-        this._handlers[event].push({
-          handler: handler
-        });
+        bindingObject = {
+          handler: b
+        };
+
+        for (k in c || {})
+          if (__allowedOptions[k])
+            bindingObject[k] = c[k];
+          else
+            throw new Error(
+              'The option "' + k + '" is not recognized by Emmett.'
+            );
+
+        this._handlers[event].push(bindingObject);
       }
 
-    } else
+    // Variant 3:
+    } else if (a && typeof a === 'object' && !Array.isArray(a))
+      for (event in a)
+        Emitter.prototype.on.call(this, event, a[event], c);
+
+    // Variant 4:
+    else if (typeof a === 'function') {
+      bindingObject = {
+        handler: a
+      };
+
+      for (k in c || {})
+        if (__allowedOptions[k])
+          bindingObject[k] = c[k];
+        else
+          throw new Error(
+            'The option "' + k + '" is not recognized by Emmett.'
+          );
+
+      this._handlersAll.push(bindingObject);
+    }
+
+    // No matching variant:
+    else
       throw new Error('Wrong arguments.');
 
+    return this;
+  };
+
+
+  /**
+   * This method works exactly as the previous on, but will always add an
+   * options object with the key "once" set to true as the last parameter.
+   *
+   * Variant 1:
+   * **********
+   * > myEmitter.once('myEvent', function(e) { console.log(e); });
+   *
+   * @param  {string}   event   The event to listen to.
+   * @param  {function} handler The function to bind.
+   * @return {Emitter}          Returns this.
+   *
+   * Variant 2:
+   * **********
+   * > myEmitter.once(
+   * >   ['myEvent1', 'myEvent2'],
+   * >   function(e) { console.log(e); }
+   * > );
+   *
+   * @param  {array}    events  The events to listen to.
+   * @param  {function} handler The function to bind.
+   * @return {Emitter}          Returns this.
+   *
+   * Variant 3:
+   * **********
+   * > myEmitter.once({
+   * >   myEvent1: function(e) { console.log(e); },
+   * >   myEvent2: function(e) { console.log(e); }
+   * > });
+   *
+   * @param  {object}  bindings An object containing pairs event / function.
+   * @return {Emitter}          Returns this.
+   *
+   * Variant 4:
+   * **********
+   * > myEmitter.once(function(e) { console.log(e); });
+   *
+   * @param  {function} handler The function to bind to every events.
+   * @return {Emitter}          Returns this.
+   */
+  Emitter.prototype.once = function(a, b) {
+    this.on.apply(
+      this,
+      Array.prototype.splice.call(arguments, 0).concat({ once: true })
+    );
     return this;
   };
 
@@ -277,7 +377,7 @@
 
         for (j = 0, m = handlers.length; j !== m; j += 1) {
           handlers[j].handler(event);
-          if (!handlers[j].one)
+          if (!handlers[j].once)
             a.push(handlers[j]);
         }
 

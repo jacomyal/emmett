@@ -2,30 +2,30 @@ var assert = require('assert'),
     emitter = require('../emmett.js');
 
 describe('Emitter', function() {
-  describe('basics', function() {
+  describe('events emission', function() {
     var count = 0,
         e = new emitter(),
         callback = function(e) {
           count += e.data.count || 1;
         };
 
-    it('dispatching an event with no trigger does nothing.', function() {
+    it('dispatching an event with no trigger does nothing', function() {
       e.emit('myEvent');
       assert.strictEqual(count, 0);
     });
 
-    it('dispatching an event with a trigger executes the callback.', function() {
+    it('dispatching an event with a trigger executes the callback', function() {
       e.on('myEvent', callback);
       e.emit('myEvent');
       assert.strictEqual(count, 1);
     });
 
-    it('dispatching an event with a trigger executes the callback.', function() {
+    it('dispatching an event with a trigger executes the callback', function() {
       e.emit('myEvent', { count: 2 });
       assert.strictEqual(count, 3);
     });
 
-    it('dispatching an event with a trigger than has been unbound does nothing.', function() {
+    it('dispatching an event with a trigger than has been unbound does nothing', function() {
       e.off('myEvent', callback);
       e.emit('myEvent');
       assert.strictEqual(count, 3);
@@ -33,7 +33,7 @@ describe('Emitter', function() {
   });
 
   describe('api', function() {
-    it('unbind polymorphisms should work.', function() {
+    it('unbind polymorphisms should work', function() {
       var count = 0,
           e = new emitter(),
           callback = function() { count++; };
@@ -54,7 +54,7 @@ describe('Emitter', function() {
       assert.strictEqual(count, 0);
     });
 
-    it('bind polymorphisms should work.', function() {
+    it('bind polymorphisms should work', function() {
       var count1 = 0,
           count2 = 0,
           e = new emitter(),

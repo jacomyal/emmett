@@ -9,18 +9,13 @@
    * Emitters are useful for non-DOM events communication. Read its methods
    * documentation for more information about how it works.
    *
-   * @param  {?Emitter} parent The parent emitter (optional).
    * @return {Emitter}         The fresh new instance.
    */
-  var Emitter = function(parent) {
+  var Emitter = function() {
     this._enabled = true;
+    this._children = [];
     this._handlers = {};
     this._handlersAll = [];
-
-    if (parent instanceof Emitter)
-      this._parent = parent;
-    else if (parent)
-      throw new Error('Wrong arguments.');
   };
 
 
@@ -254,6 +249,7 @@
         m,
         a,
         event,
+        child,
         handlers,
         eventName,
         self = this,
@@ -289,11 +285,60 @@
       }
     }
 
-    // Events delegation:
-    if (this._parent)
-      this._parent.emit.apply(this._parent, arguments);
+    // Events propagation:
+    for (i = 0, n = this._children.length; i !== n; i += 1) {
+      child = this._children[i];
+      child.emit.apply(child, arguments);
+    }
 
     return this;
+  };
+
+
+  /**
+   * This method creates a new instance of Emitter and binds it as a child. Here
+   * is what children do:
+   *  - When the parent emits an event, the children will emit the same later
+   *  - When a child is killed, it is automatically unreferenced from the parent
+   *  - When the parent is killed, all children will be killed as well
+   *
+   * @return {Emitter} Returns the fresh new child.
+   */
+  Emitter.prototype.child = function() {
+    var self = this,
+        child = new Emitter();
+
+    child.on('emmett:kill', function() {
+      if (self._children)
+        for (var i = 0, l = self._children.length; i < l; i++)
+          if (self._children[i] === child) {
+            self._children.splice(i, 1);
+            break;
+          }
+    });
+    this._children.push(child);
+
+    return child;
+  };
+
+
+  /**
+   * This method will first dispatch a "emmett:kill" event, and then unbinds all
+   * listeners and make it impossible to ever rebind any listener to any event.
+   */
+  Emitter.prototype.kill = function() {
+    this.emit('emmett:kill');
+
+    this.unbindAll();
+    this._handlers = null;
+    this._handlersAll = null;
+    this._enabled = false;
+
+    if (this._children)
+      for (var i = 0, l = this._children.length; i < l; i++)
+        this._children[i].kill();
+
+    this._children = null;
   };
 
 

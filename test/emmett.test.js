@@ -90,112 +90,126 @@ describe('Emitter', function() {
       count1 = 0;
       count2 = 0;
     });
+
+    it('killing an instance should work', function() {
+      var count = 0,
+          callback = function() { count++; },
+          e = (new emitter()).on('myEvent', callback);
+
+      e.emit('myEvent');
+      assert(count === 1);
+
+      e.kill();
+      e.emit('myEvent');
+      assert(count === 1);
+
+      assert.throws(function() { e.child(); });
+      assert.throws(function() { e.on('myEvent', callback) });
+      assert.throws(function() { e.off('myEvent', callback) });
+    });
+  });
+
+  describe('enabling / disabling', function() {
+    var count = 0,
+        callback = function() { count++; },
+        e = (new emitter()).on('myEvent', callback);
+
+    it('should stop emiting events when disabled', function() {
+      e.disable();
+      e.emit('myEvent');
+      assert(count === 0);
+    });
+
+    it('should start emiting events again when enabled back', function() {
+      e.enable();
+      e.emit('myEvent');
+      assert(count === 1);
+    });
   });
 });
 
-describe('Binder', function() {
-  describe('basics', function() {
-    var count1,
-        count2,
-        e = new emitter(),
+describe('Children', function() {
+  describe('events propagation', function() {
+    var count1 = 0,
+        count2 = 0,
+        count3 = 0,
         callback1 = function() { count1++; },
-        callback2 = function() { count2++; },
-        binder = e.binder({ myEvent1: callback1 });
+        callback2 = function() { count2++; };
+        callback3 = function() { count3++; };
+        e1 = (new emitter()).on('myEvent', callback1),
+        e2 = e1.child().on('myEvent', callback2),
+        e3 = e2.child().on('myEvent', callback3);
 
-    it('creating a binding binds the related functions.', function() {
-      count1 = 0;
-      e.emit('myEvent1');
-      assert.strictEqual(count1, 1);
+    it('should propagate from parents to children', function() {
+      e1.emit('myEvent');
+      assert(count1 === 1);
+      assert(count2 === 1);
+      assert(count3 === 1);
+      count1 = count2 = count3 = 0;
+
+      e2.emit('myEvent');
+      assert(count1 === 0);
+      assert(count2 === 1);
+      assert(count3 === 1);
+      count1 = count2 = count3 = 0;
     });
 
-    it('binder.on binds functions to the related e.', function() {
-      count2 = 0;
-      binder.on('myEvent2', callback2);
-      e.emit('myEvent2');
-      assert.strictEqual(count2, 1);
-    });
+    it('should stop propagation when a child is disabled', function() {
+      e1.disable();
+      e1.emit('myEvent');
+      assert(count1 === 0);
+      assert(count2 === 0);
+      assert(count3 === 0);
+      count1 = count2 = count3 = 0;
 
-    it('binder.off unbinds functions from the related e.', function() {
-      count2 = 0;
-      binder.off('myEvent2', callback2);
-      e.emit('myEvent2');
-      assert.strictEqual(count2, 0);
-    });
+      e1.enable();
+      e2.disable();
+      e1.emit('myEvent');
+      assert(count1 === 1);
+      assert(count2 === 0);
+      assert(count3 === 0);
+      count1 = count2 = count3 = 0;
 
-    it('binder.disable unbinds all functions from the related e.', function() {
-      count1 = 0;
-      binder.disable();
-      e.emit('myEvent1');
-      assert.strictEqual(count1, 0);
-    });
-
-    it('binder.enable rebinds all functions to the related e.', function() {
-      count1 = 0;
-      binder.enable();
-      e.emit('myEvent1');
-      assert.strictEqual(count1, 1);
+      e2.enable();
+      e3.disable();
+      e1.emit('myEvent');
+      assert(count1 === 1);
+      assert(count2 === 1);
+      assert(count3 === 0);
+      count1 = count2 = count3 = 0;
     });
   });
 
-  describe('api', function() {
-    it('unbind polymorphisms should work.', function() {
-      var count = 0,
-          e = new emitter(),
-          callback = function() { count++; },
-          binder = e.binder();
+  describe('killing instances', function() {
+    it('should tell the parent when a child is killed', function() {
+      var order = '',
+          count1 = 0,
+          count2 = 0,
+          callback1 = function() { count1++; },
+          callback2 = function() { count2++; };
+          e1 = (new emitter()).on('myEvent', callback1),
+          e2 = e1.child().on('myEvent', callback2);
 
-      binder.on('myEvent', callback);
-      binder.off('myEvent', callback);
-      e.emit('myEvent');
-      assert.strictEqual(count, 0);
+      e1.on('emmett:kill', function() { order += '1'; });
+      e2.on('emmett:kill', function() { order += '2'; });
 
-      binder.on('myEvent', callback);
-      binder.off(['myEvent', 'anotherEvent'], callback);
-      e.emit('myEvent');
-      assert.strictEqual(count, 0);
+      e2.kill();
+      assert.equal(e1._children.length, 0);
+      assert.equal(order, '2');
 
-      binder.on('myEvent', callback);
-      binder.unbindAll();
-      e.emit('myEvent');
-      assert.strictEqual(count, 0);
+      e1.emit('myEvent');
+      assert.equal(count1, 1);
+      assert.equal(count2, 0);
     });
 
-    it('bind polymorphisms should work.', function() {
-      var count1 = 0,
-          count2 = 0,
-          e = new emitter(),
-          callback1 = function() { count1++; },
-          callback2 = function() { count2++; },
-          binder = e.binder();
+    it('should kill the children when the parent is killed', function() {
+      var order = '',
+          e1 = (new emitter()).on('emmett:kill', function() { order += '1'; }),
+          e2 = e1.child().on('emmett:kill', function() { order += '2'; }),
+          e3 = e2.child().on('emmett:kill', function() { order += '3'; });
 
-      binder.on('myEvent1', callback1);
-      e.emit('myEvent1');
-      assert.strictEqual(count1, 1);
-      binder.unbindAll();
-      count1 = 0;
-
-      binder.on(['myEvent1', 'myEvent2'], callback1);
-      e.emit('myEvent1');
-      e.emit('myEvent2');
-      assert.strictEqual(count1, 2);
-      binder.unbindAll();
-      count1 = 0;
-
-      binder.on(callback1);
-      e.emit('myEvent1');
-      e.emit('myEvent2');
-      assert.deepEqual([count1, count2], [2, 0]);
-      binder.unbindAll();
-      count1 = 0;
-      count2 = 0;
-
-      binder.on({ myEvent1: callback1, myEvent2: callback2 });
-      e.emit('myEvent1');
-      e.emit('myEvent2');
-      assert.deepEqual([count1, count2], [1, 1]);
-      binder.unbindAll();
-      count1 = 0;
-      count2 = 0;
+      e1.kill();
+      assert.equal(order, '123');
     });
   });
 });

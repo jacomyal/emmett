@@ -6,7 +6,8 @@
    * @type {Object}
    */
   var __allowedOptions = {
-    once: 'boolean'
+    once: 'boolean',
+    scope: 'object'
   };
 
 
@@ -376,7 +377,10 @@
         a = [];
 
         for (j = 0, m = handlers.length; j !== m; j += 1) {
-          handlers[j].handler.call(this, event);
+          handlers[j].handler.call(
+            'scope' in handlers[j] ? handlers[j].scope : this,
+            event
+          );
           if (!handlers[j].once)
             a.push(handlers[j]);
         }

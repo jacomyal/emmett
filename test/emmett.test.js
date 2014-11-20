@@ -52,6 +52,13 @@ describe('Emitter', function() {
       e.emit('initEvent');
       assert.strictEqual(count, 1);
     });
+
+    it('handlers should be fired using custom scope if given', function() {
+      e.on('customScopeEvent', function() {
+        assert.deepEqual(this, { a: 1, b: 2 });
+      }, { scope: { a: 1, b: 2 } });
+      e.emit('customScopeEvent');
+    });
   });
 
   describe('api', function() {

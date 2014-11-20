@@ -40,6 +40,8 @@
    * *******************
    *  - {?boolean} once   If true, the handlers will be unbound after the first
    *                      execution. Default value: false.
+   *  - {?object}  scope  If a scope is given, then the listeners will be called
+   *                      with this scope as "this".
    *
    * Variant 1:
    * **********

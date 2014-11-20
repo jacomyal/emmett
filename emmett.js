@@ -168,50 +168,33 @@
 
 
   /**
-   * This method works exactly as the previous on, but will always add an
-   * options object with the key "once" set to true as the last parameter.
+   * This method works exactly as the previous #on, but will add an options
+   * object if none is given, and set the option "once" to true.
    *
-   * Variant 1:
-   * **********
-   * > myEmitter.once('myEvent', function(e) { console.log(e); });
-   *
-   * @param  {string}   event   The event to listen to.
-   * @param  {function} handler The function to bind.
-   * @return {Emitter}          Returns this.
-   *
-   * Variant 2:
-   * **********
-   * > myEmitter.once(
-   * >   ['myEvent1', 'myEvent2'],
-   * >   function(e) { console.log(e); }
-   * > );
-   *
-   * @param  {array}    events  The events to listen to.
-   * @param  {function} handler The function to bind.
-   * @return {Emitter}          Returns this.
-   *
-   * Variant 3:
-   * **********
-   * > myEmitter.once({
-   * >   myEvent1: function(e) { console.log(e); },
-   * >   myEvent2: function(e) { console.log(e); }
-   * > });
-   *
-   * @param  {object}  bindings An object containing pairs event / function.
-   * @return {Emitter}          Returns this.
-   *
-   * Variant 4:
-   * **********
-   * > myEmitter.once(function(e) { console.log(e); });
-   *
-   * @param  {function} handler The function to bind to every events.
-   * @return {Emitter}          Returns this.
+   * The polymorphism works exactly as with the #on method.
    */
-  Emitter.prototype.once = function(a, b) {
-    this.on.apply(
-      this,
-      Array.prototype.splice.call(arguments, 0).concat({ once: true })
-    );
+  Emitter.prototype.once = function(a, b, c) {
+    // Variant 1 and 2:
+    if (typeof b === 'function') {
+      c = c || {};
+      c.once = true;
+      this.on(a, b, c);
+
+    // Variants 3 and 4:
+    } else if (
+      // Variant 3:
+      (a && typeof a === 'object' && !Array.isArray(a)) ||
+      // Variant 4:
+      (typeof a === 'function')
+    ) {
+      b = b || {};
+      b.once = true;
+      this.on(a, b);
+
+    // No matching variant:
+    } else
+      throw new Error('Wrong arguments.');
+
     return this;
   };
 

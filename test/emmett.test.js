@@ -36,10 +36,10 @@ describe('Emitter', function() {
     });
 
     it('binding a function with "once" set to true should work only once', function() {
-      e.once('myEvent', callback);
-      e.emit('myEvent');
+      e.once('myOnceEvent', callback);
+      e.emit('myOnceEvent');
       assert.equal(count, 1);
-      e.emit('myEvent');
+      e.emit('myOnceEvent');
       assert.equal(count, 1);
       count = 0;
     });
@@ -58,6 +58,32 @@ describe('Emitter', function() {
         assert.deepEqual(this, { a: 1, b: 2 });
       }, { scope: { a: 1, b: 2 } });
       e.emit('customScopeEvent');
+    });
+
+    it('should work with both "once" and "scope" used', function() {
+      var scope = { a: 0 };
+      e.on(
+        'myOnceEvent',
+        function() { this.a++ },
+        { scope: scope, once: true }
+      );
+      e.emit('myOnceEvent');
+      assert.equal(scope.a, 1);
+      e.emit('myOnceEvent');
+      assert.equal(scope.a, 1);
+    });
+
+    it('should work with a "scope" used with the #once method', function() {
+      var scope = { a: 0 };
+      e.once(
+        'myOnceEvent',
+        function() { this.a++ },
+        { scope: scope }
+      );
+      e.emit('myOnceEvent');
+      assert.equal(scope.a, 1);
+      e.emit('myOnceEvent');
+      assert.equal(scope.a, 1);
     });
   });
 

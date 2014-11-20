@@ -1,5 +1,5 @@
 # Emmett - a custom events emitter for Node.js and the browser
-**version: 2.0.0**
+**version: 2.1.0**
 
 ## Description
 

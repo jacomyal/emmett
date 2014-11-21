@@ -60,6 +60,16 @@ describe('Emitter', function() {
       e.emit('customScopeEvent');
     });
 
+    it('handlers should be fired using custom scope if given (with emmett#on(object))', function() {
+      e.on(
+        { customScopeEvent2: function() {
+            assert.deepEqual(this, { a: 1, b: 2 });
+          } },
+        { scope: { a: 1, b: 2 } }
+      );
+      e.emit('customScopeEvent2');
+    });
+
     it('should work with both "once" and "scope" used', function() {
       var scope = { a: 0 };
       e.on(

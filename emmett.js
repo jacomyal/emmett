@@ -140,7 +140,7 @@
     // Variant 3:
     } else if (a && typeof a === 'object' && !Array.isArray(a))
       for (event in a)
-        Emitter.prototype.on.call(this, event, a[event], c);
+        Emitter.prototype.on.call(this, event, a[event], b);
 
     // Variant 4:
     else if (typeof a === 'function') {

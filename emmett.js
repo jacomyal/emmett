@@ -410,6 +410,52 @@
     return child;
   };
 
+  /**
+   * This returns an array of handler functions corresponding to the given
+   * event or every handler functions if an event were not to be given.
+   *
+   * @param  {?string} event Name of the event.
+   * @return {Emitter} Returns this.
+   */
+  function mapHandlers(a) {
+    var i, l, h = [];
+
+    for (i = 0, l = a.length; i < l; i++)
+      h.push(a[i].handler);
+
+    return h;
+  }
+
+  Emitter.prototype.listeners = function(event) {
+    var handlers = [],
+        k,
+        i,
+        l;
+
+    // If no event is passed, we return every handlers
+    if (!event) {
+      handlers = mapHandlers(this._handlersAll);
+
+      for (k in this._handlers)
+        handlers = handlers.concat(mapHandlers(this._handlers[k]));
+
+      // Retrieving handlers per children
+      for (i = 0, l = this._children.length; i < l; i++)
+        handlers = handlers.concat(this._children[i].listeners());
+    }
+
+    // Else we only retrieve the needed handlers
+    else {
+      handlers = mapHandlers(this._handlers[event]);
+
+      // Retrieving handlers per children
+      for (i = 0, l = this._children.length; i < l; i++)
+        handlers = handlers.concat(this._children[i].listeners(event));
+    }
+
+    return handlers;
+  };
+
 
   /**
    * This method will first dispatch a "emmett:kill" event, and then unbinds all

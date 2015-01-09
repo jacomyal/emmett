@@ -253,6 +253,25 @@ describe('Children', function() {
     });
   });
 
+  describe('Retrieving listeners', function() {
+    it('should be possible to retrieve an emitter\'s listeners', function() {
+      var ee = new emitter(),
+          fn = function test() {};
+
+      ee.on(fn);
+      ee.on('event1', fn);
+      ee.on('event2', fn);
+
+      assert.deepEqual(ee.listeners(), [fn, fn, fn]);
+      assert.deepEqual(ee.listeners('event1'), [fn]);
+
+      ee.child().on('event1', fn);
+
+      assert.strictEqual(ee.listeners().length, 5);
+      assert.deepEqual(ee.listeners('event1'), [fn, fn]);
+    });
+  });
+
   describe('killing instances', function() {
     it('should tell the parent when a child is killed', function() {
       var order = '',

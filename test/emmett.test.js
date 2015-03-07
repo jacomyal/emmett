@@ -9,7 +9,7 @@ describe('Emitter', function() {
           count += e.data.count || 1;
         };
 
-    it('unregistering event in event callback should work', function() {
+    it('unregistering event in emit callback should work', function() {
       var callback = function () {
         e.off('myEvent', callback);
         count++;
@@ -17,6 +17,19 @@ describe('Emitter', function() {
       e.on('myEvent', callback);
       e.emit('myEvent');
       e.emit('myEvent');
+      assert.equal(count, 1);
+      count = 0;
+    });
+
+    it('unregistering other event in emit callback should work', function() {
+      var callback = function () {
+        e.off('myEvent2', callback);
+        count++;
+      };
+      e.once('myEvent', callback);
+      e.on('myEvent2', callback);
+      e.emit('myEvent');
+      e.emit('myEvent2');
       assert.equal(count, 1);
       count = 0;
     });

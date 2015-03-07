@@ -9,6 +9,18 @@ describe('Emitter', function() {
           count += e.data.count || 1;
         };
 
+    it('unregistering event in event callback should work', function() {
+      var callback = function () {
+        e.off('myEvent', callback);
+        count++;
+      };
+      e.on('myEvent', callback);
+      e.emit('myEvent');
+      e.emit('myEvent');
+      assert.equal(count, 1);
+      count = 0;
+    });
+
     it('dispatching an event with no trigger does nothing', function() {
       e.emit('myEvent');
       assert.equal(count, 0);

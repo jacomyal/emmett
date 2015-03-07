@@ -333,6 +333,7 @@
         n,
         j,
         m,
+        z,
         a,
         event,
         child,
@@ -366,11 +367,19 @@
             'scope' in handlers[j] ? handlers[j].scope : this,
             event
           );
-          if (!handlers[j].once)
+
+          // Since the listener callback can mutate the _handlers,
+          // we register the handlers we want to remove, not the ones
+          // we want to keep
+          if (handlers[j].once)
             a.push(handlers[j]);
         }
 
-        this._handlers[eventName] = a;
+        // Go through handlers to remove
+        for (z = 0; z < a.length; z++) {
+          this._handlers[eventName].splice(a.indexOf(a[z]), 1);
+        }
+
       }
     }
 

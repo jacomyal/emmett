@@ -366,9 +366,13 @@
 
           // We have to verify that the handler still exists in the array,
           // as it might have been mutated already
-          if ((this._handlers[eventName] && this._handlers[eventName].indexOf(handlers[j]) >= 0) || 
-                this._handlersAll.indexOf(handlers[j]) >= 0) {
-
+          if (
+            (
+              this._handlers[eventName] &&
+              this._handlers[eventName].indexOf(handlers[j]) >= 0
+            ) ||
+            this._handlersAll.indexOf(handlers[j]) >= 0
+          ) {
             handlers[j].handler.call(
               'scope' in handlers[j] ? handlers[j].scope : this,
               event
@@ -379,7 +383,6 @@
             // we want to keep
             if (handlers[j].once)
               a.push(handlers[j]);
-
           }
         }
 
@@ -387,7 +390,6 @@
         for (z = 0; z < a.length; z++) {
           this._handlers[eventName].splice(a.indexOf(a[z]), 1);
         }
-
       }
     }
 

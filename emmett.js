@@ -318,6 +318,12 @@
       }
     }
 
+    // Variant 3
+    else if (isPlainObject(events)) {
+      for (k in events)
+        Emitter.prototype.off.call(this, k, events[k]);
+    }
+
     return this;
   };
 

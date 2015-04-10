@@ -172,6 +172,15 @@ describe('Emitter', function() {
       e.unbindAll();
       e.emit('myEvent');
       assert.equal(count, 0);
+
+      e.on('event1', callback);
+      e.on('event2', callback);
+      e.off({
+        event1: callback,
+        event2: callback
+      });
+      e.emit(['event1', 'event2']);
+      assert.strictEqual(count, 0);
     });
 
     it('bind polymorphisms should work', function() {

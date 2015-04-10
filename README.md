@@ -1,8 +1,8 @@
 # Emmett
 
-**Emmett** is a custom events emitter for Node.js and the browser.
+A custom event emitter for Node.js and the browser.
 
-It aims at provide its user with a lot of event emitting sugar while remaining lightweight and fast.
+It aims at providing its user with a lot of event emitting sugar while remaining lightweight and fast.
 
 ## Installation
 
@@ -37,7 +37,7 @@ emitter.once('eventName', callback);
 emitter.on(/^event/, callback);
 
 // Options
-emitter.on('eventName', callback, {scope: customScope});
+emitter.on('eventName', callback, {scope: customScope, once: true});
 
 // Polymorphisms
 emitter.on(['event1', 'event2'], callback);
@@ -58,6 +58,16 @@ Events are objects having the following keys:
 * **data**: the data attached to the event.
 * **type**: the event type.
 * **target**: the event emitter.
+
+```js
+emitter.on('myEvent', function(e) {
+	console.log(e.data);
+});
+
+emitter.emit('myEvent', 'Hello World!');
+
+// Will print "Hello World!" in the console
+```
 
 ## Removing listeners
 

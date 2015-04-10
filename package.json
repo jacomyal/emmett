@@ -1,7 +1,7 @@
 {
   "name": "emmett",
   "version": "2.1.2",
-  "description": "A custom events emitter for Node.js and the browser",
+  "description": "A custom event emitter for Node.js and the browser.",
   "main": "emmett.js",
   "scripts": {
     "test": "gulp test",

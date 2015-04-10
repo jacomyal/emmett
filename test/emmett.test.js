@@ -181,14 +181,6 @@ describe('Emitter', function() {
       count2 = 0;
     });
 
-    it('giving unrecognized parameters should throw an error', function() {
-      var count = 0,
-          callback = function() { count++; },
-          e = new emitter();
-
-      assert.throws(function() { e.on('myEvent', callback, { blabla: 42 }) });
-    });
-
     it('killing an instance should work', function() {
       var count = 0,
           callback = function() { count++; },

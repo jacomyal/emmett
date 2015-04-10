@@ -129,10 +129,6 @@
         for (k in c || {})
           if (__allowedOptions[k])
             bindingObject[k] = c[k];
-          else
-            throw new Error(
-              'The option "' + k + '" is not recognized by Emmett.'
-            );
 
         this._handlers[event].push(bindingObject);
       }
@@ -151,10 +147,6 @@
       for (k in c || {})
         if (__allowedOptions[k])
           bindingObject[k] = c[k];
-        else
-          throw new Error(
-            'The option "' + k + '" is not recognized by Emmett.'
-          );
 
       this._handlersAll.push(bindingObject);
     }

@@ -266,6 +266,13 @@
    *
    * @param  {function} handler The function to unbind from every events.
    * @return {Emitter}          Returns this.
+   *
+   * Variant 5:
+   * **********
+   * > myEmitter.off(event);
+   *
+   * @param  {string} event     The event we should unbind.
+   * @return {Emitter}          Returns this.
    */
   Emitter.prototype.off = function(events, handler) {
     var i,
@@ -274,11 +281,10 @@
         m,
         k,
         a,
-        event,
-        eArray = typeof events === 'string' ? [events] : events;
+        event;
 
     // Variant 4:
-    if (arguments.length === 1 && typeof eArray === 'function') {
+    if (arguments.length === 1 && typeof events === 'function') {
       handler = arguments[0];
 
       // Handlers bound to events:
@@ -293,15 +299,30 @@
           delete this._handlers[k];
       }
 
+      // Generic handlers
       a = [];
       for (i = 0, n = this._handlersAll.length; i < n; i++)
         if (this._handlersAll[i].handler !== handler)
           a.push(this._handlersAll[i]);
       this._handlersAll = a;
+
+      // Complex handlers
+      a = [];
+      for (i = 0, n = this._handlersComplex.length; i < n; i++)
+        if (this._handlersComplex[i].handler !== handler)
+          a.push(this._handlersComplex[i]);
+      this._handlersComplex = a;
+    }
+
+    // Variant 5
+    else if (arguments.length === 1 && typeof events === 'string') {
+      delete this._handlers[events];
     }
 
     // Variant 1 and 2:
     else if (arguments.length === 2) {
+      var eArray = [].concat(events);
+
       for (i = 0, n = eArray.length; i < n; i++) {
         event = eArray[i];
         if (this._handlers[event]) {

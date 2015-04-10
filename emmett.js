@@ -476,11 +476,10 @@
 
 
   /**
-   * This method will first dispatch a "emmett:kill" event, and then unbinds all
-   * listeners and make it impossible to ever rebind any listener to any event.
+   * This method will unbind all listeners and make it impossible to ever
+   * rebind any listener to any event.
    */
   Emitter.prototype.kill = function() {
-    this.emit('emmett:kill');
 
     this.unbindAll();
     this._handlers = null;

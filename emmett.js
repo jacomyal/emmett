@@ -10,6 +10,37 @@
     scope: 'object'
   };
 
+  /**
+   * A simple helper to shallowly merge two objects. The second one will "win"
+   * over the first one.
+   *
+   * @param  {object}  o1 First target object.
+   * @param  {object}  o2 Second target object.
+   * @return {object}     Returns the merged object.
+   */
+  function shallowMerge(o1, o2) {
+    var o = {},
+        k;
+
+    for (k in o1) o[k] = o1[k];
+    for (k in o2) o[k] = o2[k];
+
+    return o;
+  }
+
+  /**
+   * Is the given variable a plain JavaScript object?
+   *
+   * @param  {mixed}  v   Target.
+   * @return {boolean}    The boolean result.
+   */
+  function isPlainObject(v) {
+    return v &&
+           typeof v === 'object' &&
+           !Array.isArray(v) &&
+           !(v instanceof Function);
+  }
+
 
   /**
    * The emitter's constructor. It initializes the handlers-per-events store and
@@ -134,7 +165,7 @@
       }
 
     // Variant 3:
-    } else if (a && typeof a === 'object' && !Array.isArray(a))
+    } else if (isPlainObject(a))
       for (event in a)
         Emitter.prototype.on.call(this, event, a[event], b);
 
@@ -165,29 +196,16 @@
    *
    * The polymorphism works exactly as with the #on method.
    */
-  Emitter.prototype.once = function(a, b, c) {
-    // Variant 1 and 2:
-    if (typeof b === 'function') {
-      c = c || {};
-      c.once = true;
-      this.on(a, b, c);
+  Emitter.prototype.once = function() {
+    var args = Array.prototype.slice.call(arguments),
+        li = args.length - 1;
 
-    // Variants 3 and 4:
-    } else if (
-      // Variant 3:
-      (a && typeof a === 'object' && !Array.isArray(a)) ||
-      // Variant 4:
-      (typeof a === 'function')
-    ) {
-      b = b || {};
-      b.once = true;
-      this.on(a, b);
+    if (isPlainObject(args[li]) && args.length > 1)
+      args[li] = shallowMerge(args[li], {once: true});
+    else
+      args.push({once: true});
 
-    // No matching variant:
-    } else
-      throw new Error('Wrong arguments.');
-
-    return this;
+    return this.on.apply(this, args);
   };
 
 

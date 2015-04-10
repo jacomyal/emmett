@@ -136,6 +136,20 @@ describe('Emitter', function() {
       ne.emit('event');
       assert.deepEqual(results, [1, 2]);
     });
+
+    it('should be possible to bind regexes.', function() {
+      var count = 0,
+          ne = new emitter(),
+          callback = function() { count++; };
+
+      ne.on(/^event/, callback);
+      ne.on(/event\d+/, callback);
+
+      ne.emit('event1');
+      ne.emit('eventOne');
+
+      assert.strictEqual(count, 3);
+    });
   });
 
   describe('api', function() {
@@ -264,8 +278,8 @@ describe('Emitter', function() {
       ee.on('event1', fn);
       ee.on('event2', fn);
 
-      assert.deepEqual(m(ee.listeners()), [fn, fn, fn]);
       assert.deepEqual(m(ee.listeners('event1')), [fn, fn]);
+      assert.deepEqual(m(ee.listeners('event2')), [fn, fn]);
     });
   });
 });

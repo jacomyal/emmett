@@ -59,6 +59,7 @@
     this._enabled = true;
     this._handlers = {};
     this._handlersAll = [];
+    this._handlersComplex = [];
   };
 
 
@@ -138,6 +139,7 @@
         k,
         event,
         eArray,
+        handlerList,
         bindingObject;
 
     // Variant 1 and 2:
@@ -152,13 +154,20 @@
         if (!event)
           continue;
 
-        if (!this._handlers[event])
-          this._handlers[event] = [];
-
         bindingObject = {
           order: __order++,
           handler: b
         };
+
+        if (event instanceof RegExp) {
+          handlerList = this._handlersComplex;
+          bindingObject.pattern = event;
+        }
+        else {
+          if (!this._handlers[event])
+            this._handlers[event] = [];
+          handlerList = this._handlers[event];
+        }
 
         for (k in c || {})
           if (__allowedOptions[k])
@@ -167,7 +176,7 @@
         if (bindingObject.once)
           bindingObject.parent = this._handlers[event];
 
-        this._handlers[event].push(bindingObject);
+        handlerList.push(bindingObject);
       }
 
     // Variant 3:
@@ -329,6 +338,7 @@
     var k;
 
     this._handlersAll = [];
+    this._handlersComplex = [];
     for (k in this._handlers)
       delete this._handlers[k];
 
@@ -342,25 +352,25 @@
    * @return {array}      Array of handler functions.
    */
   Emitter.prototype.listeners = function(event) {
-    var handlers = this._handlersAll || [],
-        k,
+    var handlers = this._handlersAll || [],
+        h,
         i,
         l;
 
-    // If no event is passed, we return every handlers
-    if (!event) {
+    if (!event)
+      throw Error('Emitter.listeners: no event provided.');
 
-      for (k in this._handlers)
-        handlers = handlers.concat(this._handlers[k] || []);
-    }
+    handlers = handlers.concat(this._handlers[event] || []);
 
-    // Else we only retrieve the needed handlers
-    else {
-      handlers = handlers.concat(this._handlers[event] || []);
+    for (i = 0, l = this._handlersComplex.length; i < l; i++) {
+      h = this._handlersComplex[i];
+
+      if (~event.search(h.pattern))
+        handlers.push(h);
     }
 
     // If we have any complex handlers, we need to sort
-    if (this._handlersAll.length)
+    if (this._handlersAll.length || this._handlersComplex.length)
       return handlers.sort(function(a, b) {
         return a.order - b.order;
       });
@@ -448,6 +458,7 @@
     this.unbindAll();
     this._handlers = null;
     this._handlersAll = null;
+    this._handlersComplex = null;
     this._enabled = false;
   };
 

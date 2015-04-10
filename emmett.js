@@ -41,7 +41,6 @@
            !(v instanceof Function);
   }
 
-
   /**
    * The emitter's constructor. It initializes the handlers-per-events store and
    * the global handlers store.
@@ -53,7 +52,6 @@
    */
   var Emitter = function() {
     this._enabled = true;
-    this._children = [];
     this._handlers = {};
     this._handlersAll = [];
   };
@@ -160,6 +158,9 @@
           if (__allowedOptions[k])
             bindingObject[k] = c[k];
 
+        if (bindingObject.once)
+          bindingObject.parent = this._handlers[event];
+
         this._handlers[event].push(bindingObject);
       }
 
@@ -177,6 +178,9 @@
       for (k in c || {})
         if (__allowedOptions[k])
           bindingObject[k] = c[k];
+
+      if (bindingObject.once)
+        bindingObject.parent = this._handlersAll;
 
       this._handlersAll.push(bindingObject);
     }
@@ -324,6 +328,32 @@
     return this;
   };
 
+  /**
+   * This method retrieve the listeners attached to a particular event.
+   *
+   * @param  {?string}    Name of the event.
+   * @return {array}      Array of handler functions.
+   */
+  Emitter.prototype.listeners = function(event) {
+    var handlers = this._handlersAll || [],
+        k,
+        i,
+        l;
+
+    // If no event is passed, we return every handlers
+    if (!event) {
+
+      for (k in this._handlers)
+        handlers = handlers.concat(this._handlers[k] || []);
+    }
+
+    // Else we only retrieve the needed handlers
+    else {
+      handlers = handlers.concat(this._handlers[event] || []);
+    }
+
+    return handlers.slice(0);
+  };
 
   /**
    * This method emits the specified event(s), and executes every handlers bound
@@ -335,156 +365,63 @@
    * > myEmitter.emit('myEvent', myData);
    * > myEmitter.emit(['myEvent1', 'myEvent2']);
    * > myEmitter.emit(['myEvent1', 'myEvent2'], myData);
+   * > myEmitter.emit({myEvent1: myData1, myEvent2: myData2});
    *
    * @param  {string|array} events The event(s) to emit.
    * @param  {object?}      data   The data.
    * @return {Emitter}             Returns this.
    */
   Emitter.prototype.emit = function(events, data) {
-    var i,
-        n,
-        j,
-        m,
-        z,
-        a,
-        event,
-        child,
-        handlers,
-        eventName,
-        self = this,
-        eArray = typeof events === 'string' ?
-          [events] :
-          events;
 
-    // Check that the emitter is enabled:
+    // Short exit if the emitter is disabled
     if (!this._enabled)
       return this;
 
-    data = data === undefined ? {} : data;
+    // Object variant
+    if (isPlainObject(events)) {
 
-    for (i = 0, n = eArray.length; i < n; i++) {
-      eventName = eArray[i];
-      handlers = (this._handlers[eventName] || []).concat(this._handlersAll);
+      for (var k in events)
+        Emitter.prototype.emit.call(this, k, events[k]);
 
-      if (handlers.length) {
-        event = {
-          type: eventName,
-          data: data || {},
-          target: this
-        };
-        a = [];
-
-        for (j = 0, m = handlers.length; j < m; j++) {
-
-          // We have to verify that the handler still exists in the array,
-          // as it might have been mutated already
-          if (
-            (
-              this._handlers[eventName] &&
-              this._handlers[eventName].indexOf(handlers[j]) >= 0
-            ) ||
-            this._handlersAll.indexOf(handlers[j]) >= 0
-          ) {
-            handlers[j].handler.call(
-              'scope' in handlers[j] ? handlers[j].scope : this,
-              event
-            );
-
-            // Since the listener callback can mutate the _handlers,
-            // we register the handlers we want to remove, not the ones
-            // we want to keep
-            if (handlers[j].once)
-              a.push(handlers[j]);
-          }
-        }
-
-        // Go through handlers to remove
-        for (z = 0; z < a.length; z++) {
-          this._handlers[eventName].splice(a.indexOf(a[z]), 1);
-        }
-      }
+      return this;
     }
 
-    // Events propagation:
-    for (i = 0, n = this._children.length; i < n; i++) {
-      child = this._children[i];
-      child.emit.apply(child, arguments);
+    var eArray = [].concat(events),
+        onces = [],
+        event,
+        handlers,
+        h,
+        i,
+        j,
+        l,
+        m;
+
+    // Default data
+    data = (data === undefined) ? {} : data;
+
+    for (i = 0, l = eArray.length; i < l; i++) {
+      handlers = this.listeners(eArray[i]);
+
+      for (j = 0, m = handlers.length; j < m; j++) {
+        h = handlers[j];
+        event = {
+          type: eArray[i],
+          data: data,
+          target: this
+        };
+
+        h.handler.call('scope' in h ? h.scope : this, event);
+
+        if (h.once)
+          onces.push(h);
+      }
+
+      // Cleaning onces
+      for (j = 0, m = onces.length; j < m; j++)
+        onces[j].parent.splice(onces[j].parent.indexOf(onces[j]), 1);
     }
 
     return this;
-  };
-
-
-  /**
-   * This method creates a new instance of Emitter and binds it as a child. Here
-   * is what children do:
-   *  - When the parent emits an event, the children will emit the same later
-   *  - When a child is killed, it is automatically unreferenced from the parent
-   *  - When the parent is killed, all children will be killed as well
-   *
-   * @return {Emitter} Returns the fresh new child.
-   */
-  Emitter.prototype.child = function() {
-    var self = this,
-        child = new Emitter();
-
-    child.on('emmett:kill', function() {
-      if (self._children)
-        for (var i = 0, l = self._children.length; i < l; i++)
-          if (self._children[i] === child) {
-            self._children.splice(i, 1);
-            break;
-          }
-    });
-    this._children.push(child);
-
-    return child;
-  };
-
-  /**
-   * This returns an array of handler functions corresponding to the given
-   * event or every handler functions if an event were not to be given.
-   *
-   * @param  {?string} event Name of the event.
-   * @return {Emitter} Returns this.
-   */
-  function mapHandlers(a) {
-    var i, l, h = [];
-
-    for (i = 0, l = a.length; i < l; i++)
-      h.push(a[i].handler);
-
-    return h;
-  }
-
-  Emitter.prototype.listeners = function(event) {
-    var handlers = [],
-        k,
-        i,
-        l;
-
-    // If no event is passed, we return every handlers
-    if (!event) {
-      handlers = mapHandlers(this._handlersAll);
-
-      for (k in this._handlers)
-        handlers = handlers.concat(mapHandlers(this._handlers[k]));
-
-      // Retrieving handlers per children
-      for (i = 0, l = this._children.length; i < l; i++)
-        handlers = handlers.concat(this._children[i].listeners());
-    }
-
-    // Else we only retrieve the needed handlers
-    else {
-      handlers = mapHandlers(this._handlers[event]);
-
-      // Retrieving handlers per children
-      for (i = 0, l = this._children.length; i < l; i++)
-        handlers = handlers.concat(this._children[i].listeners(event));
-    }
-
-    return handlers;
   };
 
 
@@ -499,12 +436,6 @@
     this._handlers = null;
     this._handlersAll = null;
     this._enabled = false;
-
-    if (this._children)
-      for (var i = 0, l = this._children.length; i < l; i++)
-        this._children[i].kill();
-
-    this._children = null;
   };
 
 

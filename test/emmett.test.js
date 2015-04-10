@@ -216,109 +216,24 @@ describe('Emitter', function() {
       assert.equal(count, 1);
     });
   });
-});
-
-describe('Children', function() {
-  describe('events propagation', function() {
-    var count1 = 0,
-        count2 = 0,
-        count3 = 0,
-        callback1 = function() { count1++; },
-        callback2 = function() { count2++; };
-        callback3 = function() { count3++; };
-        e1 = (new emitter()).on('myEvent', callback1),
-        e2 = e1.child().on('myEvent', callback2),
-        e3 = e2.child().on('myEvent', callback3);
-
-    it('should propagate from parents to children', function() {
-      e1.emit('myEvent');
-      assert.equal(count1, 1);
-      assert.equal(count2, 1);
-      assert.equal(count3, 1);
-      count1 = count2 = count3 = 0;
-
-      e2.emit('myEvent');
-      assert.equal(count1, 0);
-      assert.equal(count2, 1);
-      assert.equal(count3, 1);
-      count1 = count2 = count3 = 0;
-    });
-
-    it('should stop propagation when a child is disabled', function() {
-      e1.disable();
-      e1.emit('myEvent');
-      assert.equal(count1, 0);
-      assert.equal(count2, 0);
-      assert.equal(count3, 0);
-      count1 = count2 = count3 = 0;
-
-      e1.enable();
-      e2.disable();
-      e1.emit('myEvent');
-      assert.equal(count1, 1);
-      assert.equal(count2, 0);
-      assert.equal(count3, 0);
-      count1 = count2 = count3 = 0;
-
-      e2.enable();
-      e3.disable();
-      e1.emit('myEvent');
-      assert.equal(count1, 1);
-      assert.equal(count2, 1);
-      assert.equal(count3, 0);
-      count1 = count2 = count3 = 0;
-    });
-  });
 
   describe('Retrieving listeners', function() {
     it('should be possible to retrieve an emitter\'s listeners', function() {
       var ee = new emitter(),
           fn = function test() {};
 
+      var m = function(hs) {
+        return hs.map(function(h) {
+          return h.handler;
+        });
+      };
+
       ee.on(fn);
       ee.on('event1', fn);
       ee.on('event2', fn);
 
-      assert.deepEqual(ee.listeners(), [fn, fn, fn]);
-      assert.deepEqual(ee.listeners('event1'), [fn]);
-
-      ee.child().on('event1', fn);
-
-      assert.strictEqual(ee.listeners().length, 5);
-      assert.deepEqual(ee.listeners('event1'), [fn, fn]);
-    });
-  });
-
-  describe('killing instances', function() {
-    it('should tell the parent when a child is killed', function() {
-      var order = '',
-          count1 = 0,
-          count2 = 0,
-          callback1 = function() { count1++; },
-          callback2 = function() { count2++; };
-          e1 = (new emitter()).on('myEvent', callback1),
-          e2 = e1.child().on('myEvent', callback2);
-
-      e1.on('emmett:kill', function() { order += '1'; });
-      e2.on('emmett:kill', function() { order += '2'; });
-
-      e2.kill();
-      assert.equal(e1._children.length, 0);
-      assert.equal(order, '2');
-
-      e1.emit('myEvent');
-      assert.equal(count1, 1);
-      assert.equal(count2, 0);
-    });
-
-    it('should kill the children when the parent is killed', function() {
-      var order = '',
-          e1 = (new emitter()).on('emmett:kill', function() { order += '1'; }),
-          e2 = e1.child().on('emmett:kill', function() { order += '2'; }),
-          e3 = e2.child().on('emmett:kill', function() { order += '3'; });
-
-      e1.kill();
-      assert.equal(order, '123');
+      assert.deepEqual(m(ee.listeners()), [fn, fn, fn]);
+      assert.deepEqual(m(ee.listeners('event1')), [fn, fn]);
     });
   });
 });

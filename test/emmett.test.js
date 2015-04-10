@@ -120,6 +120,22 @@ describe('Emitter', function() {
       e.emit('myOnceEvent');
       assert.equal(scope.a, 1);
     });
+
+    it('should guarantee binding order.', function() {
+      var results = [],
+          ne = new emitter();
+
+      ne.on('event', function() {
+        results.push(1);
+      });
+
+      ne.on(function() {
+        results.push(2);
+      });
+
+      ne.emit('event');
+      assert.deepEqual(results, [1, 2]);
+    });
   });
 
   describe('api', function() {

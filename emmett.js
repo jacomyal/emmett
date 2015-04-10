@@ -11,6 +11,11 @@
   };
 
   /**
+   * Incremental id used to order event handlers.
+   */
+  var __order = 0;
+
+  /**
    * A simple helper to shallowly merge two objects. The second one will "win"
    * over the first one.
    *
@@ -151,6 +156,7 @@
           this._handlers[event] = [];
 
         bindingObject = {
+          order: __order++,
           handler: b
         };
 
@@ -172,6 +178,7 @@
     // Variant 4:
     else if (typeof a === 'function') {
       bindingObject = {
+        order: __order,
         handler: a
       };
 
@@ -352,7 +359,13 @@
       handlers = handlers.concat(this._handlers[event] || []);
     }
 
-    return handlers.slice(0);
+    // If we have any complex handlers, we need to sort
+    if (this._handlersAll.length)
+      return handlers.sort(function(a, b) {
+        return a.order - b.order;
+      });
+    else
+      return handlers.slice(0);
   };
 
   /**

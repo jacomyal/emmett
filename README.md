@@ -1,20 +1,149 @@
-# Emmett - a custom events emitter for Node.js and the browser
-**version: 2.1.2**
+# Emmett
 
-## Description
+**Emmett** is a custom events emitter for Node.js and the browser.
 
-**Emmett** is a custom events emitter for Node.js and the browser. It has initially been developed as domino.emitter, to deal with communication in domino.js, a JavaScript cascading controller for rich internet applications.
+It aims at provide its user with a lot of event emitting sugar while remaining lightweight and fast.
 
-I invite you to read [emmett's code](./emmett.js) to know more about how it works. To see examples, you can check the unit tests in [test/emmett.test.js](./test/emmett.test.js).
+## Installation
 
-Finally, if you see bugs or features that would improve the library, feel free to report them on the related [Github issues page](https://github.com/jacomyal/emmett/issues).
+You can install **Emmett** through npm:
 
-## Install
+```bash
+npm install --save emmett
+```
 
-First, you can install emmett from NPM: `npm install --save emmett`, or directly save locally the [`emmett.min.js`](./emmett.min.js) minified file.
+Or you can just drop the [`emmett.min.js`](./emmett.min.js) file in your project (will work with many popular module systems).
 
-Also, you can install the development version:
- 1. Clone the repository: `git clone http://github.com/jacomyal/emmett`
- 2. Install dependencies: `npm install`
- 3. Check the unit tests: `npm test`
- 4. Get a minified version (`./emmett.min.js`): `npm build`
+## Usage
+
+### Creating an emitter
+
+```js
+var Emitter = require('emmett');
+
+var emitter = new Emitter();
+```
+
+### Listening to events
+
+```js
+// Basic
+emitter.on('eventName', callback);
+
+// Once
+emitter.once('eventName', callback);
+
+// Matching event names with a regex
+emitter.on(/^event/, callback);
+
+// Options
+emitter.on('eventName', callback, {scope: customScope});
+
+// Polymorphisms
+emitter.on(['event1', 'event2'], callback);
+
+emitter.on({
+	event1: callback1,
+	event2: callback2
+});
+
+// Listening to every events
+emitter.on(callback);
+```
+
+## Event data
+
+Events are objects having the following keys:
+
+* **data**: the data attached to the event.
+* **type**: the event type.
+* **target**: the event emitter.
+
+## Removing listeners
+
+```js
+// Basic
+emitter.off('eventName', callback);
+
+// Removing every listeners attached to the given event
+emitter.off('eventName');
+
+// Removing the callback from any event
+emitter.off(callback);
+
+// Polymorphisms
+emitter.off(['event1', 'event2'], callback);
+
+emitter.off({
+	event1: callback1,
+	event2: callback2
+});
+
+// Removing every listeners
+emitter.unbindAll();
+```
+
+## Emitting
+
+```js
+// Basic
+emitter.emit('eventName');
+
+// With data
+emitter.emit('eventName', {hello: 'world'});
+
+// Polymorphisms
+emitter.emit(['event1', 'event2']);
+emitter.emit(['event1', 'event2'], {hello: 'world'});
+
+emitter.emit({
+	event1: 'hey',
+	event2: 'ho'
+});
+```
+
+## Retrieving listeners
+
+```js
+// Return every matching handlers for a given event name
+emitter.listeners('eventName');
+```
+
+## Disabling an emitter
+
+While disabled, emitting events won't produce nothing.
+
+```js
+emitter.disable();
+emitter.enable();
+```
+
+## Killing an emitter
+
+Killing an emitter will remove all its listeners and make it inoperant in the future.
+
+```js
+emitter.kill();
+```
+
+## Contribution
+
+Do not hesitate to contribute to the library. Be sure to add and pass any relevant unit test before submitting any code.
+
+```bash
+# Installing the dev version
+git clone http://github.com/jacomyal/emmett
+cd emmett
+
+# Installing dependencies
+npm install
+
+# Running unit tests
+npm test
+
+# Build a minified version
+npm build
+
+# Lint the code
+gulp lint
+```

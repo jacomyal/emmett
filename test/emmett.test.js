@@ -181,6 +181,22 @@ describe('Emitter', function() {
       count2 = 0;
     });
 
+    it('emit polymorphism should work.', function() {
+      var count = 0,
+          callback = function(e) { count += e.data; },
+          e = new emitter();
+
+      e.on('event1', callback);
+      e.on('event2', callback);
+
+      e.emit({
+        event1: 2,
+        event2: 3
+      });
+
+      assert.strictEqual(count, 5);
+    });
+
     it('killing an instance should work', function() {
       var count = 0,
           callback = function() { count++; },

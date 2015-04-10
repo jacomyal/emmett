@@ -184,7 +184,7 @@
 
     // No matching variant:
     else
-      throw new Error('Wrong arguments.');
+      throw new Error('Emitter.on: wrong arguments.');
 
     return this;
   };

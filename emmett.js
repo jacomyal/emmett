@@ -139,11 +139,10 @@
 
     // Variant 1 and 2:
     if (typeof b === 'function') {
-      eArray = typeof a === 'string' ?
-        [a] :
-        a;
+      eArray = [].concat(a);
 
-      for (i = 0, l = eArray.length; i !== l; i += 1) {
+
+      for (i = 0, l = eArray.length; i < l; i++) {
         event = eArray[i];
 
         // Check that event is not '':
@@ -256,35 +255,38 @@
         k,
         a,
         event,
-        eArray = typeof events === 'string' ?
-          [events] :
-          events;
+        eArray = typeof events === 'string' ? [events] : events;
 
+    // Variant 4:
     if (arguments.length === 1 && typeof eArray === 'function') {
       handler = arguments[0];
 
       // Handlers bound to events:
       for (k in this._handlers) {
         a = [];
-        for (i = 0, n = this._handlers[k].length; i !== n; i += 1)
+        for (i = 0, n = this._handlers[k].length; i < n; i++)
           if (this._handlers[k][i].handler !== handler)
             a.push(this._handlers[k][i]);
         this._handlers[k] = a;
+
+        if (this._handlers[k].length === 0)
+          delete this._handlers[k];
       }
 
       a = [];
-      for (i = 0, n = this._handlersAll.length; i !== n; i += 1)
+      for (i = 0, n = this._handlersAll.length; i < n; i++)
         if (this._handlersAll[i].handler !== handler)
           a.push(this._handlersAll[i]);
       this._handlersAll = a;
     }
 
+    // Variant 1 and 2:
     else if (arguments.length === 2) {
-      for (i = 0, n = eArray.length; i !== n; i += 1) {
+      for (i = 0, n = eArray.length; i < n; i++) {
         event = eArray[i];
         if (this._handlers[event]) {
           a = [];
-          for (j = 0, m = this._handlers[event].length; j !== m; j += 1)
+          for (j = 0, m = this._handlers[event].length; j < m; j++)
             if (this._handlers[event][j].handler !== handler)
               a.push(this._handlers[event][j]);
 
@@ -360,7 +362,7 @@
 
     data = data === undefined ? {} : data;
 
-    for (i = 0, n = eArray.length; i !== n; i += 1) {
+    for (i = 0, n = eArray.length; i < n; i++) {
       eventName = eArray[i];
       handlers = (this._handlers[eventName] || []).concat(this._handlersAll);
 
@@ -372,7 +374,7 @@
         };
         a = [];
 
-        for (j = 0, m = handlers.length; j !== m; j += 1) {
+        for (j = 0, m = handlers.length; j < m; j++) {
 
           // We have to verify that the handler still exists in the array,
           // as it might have been mutated already
@@ -404,7 +406,7 @@
     }
 
     // Events propagation:
-    for (i = 0, n = this._children.length; i !== n; i += 1) {
+    for (i = 0, n = this._children.length; i < n; i++) {
       child = this._children[i];
       child.emit.apply(child, arguments);
     }

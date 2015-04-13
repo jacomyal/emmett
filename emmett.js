@@ -43,7 +43,8 @@
     return v &&
            typeof v === 'object' &&
            !Array.isArray(v) &&
-           !(v instanceof Function);
+           !(v instanceof Function) &&
+           !(v instanceof RegExp);
   }
 
   /**
@@ -142,68 +143,57 @@
         handlerList,
         bindingObject;
 
-    // Variant 1 and 2:
-    if (typeof b === 'function') {
-      eArray = [].concat(a);
-
-
-      for (i = 0, l = eArray.length; i < l; i++) {
-        event = eArray[i];
-
-        // Check that event is not '':
-        if (!event)
-          continue;
-
-        bindingObject = {
-          order: __order++,
-          handler: b
-        };
-
-        if (event instanceof RegExp) {
-          handlerList = this._handlersComplex;
-          bindingObject.pattern = event;
-        }
-        else {
-          if (!this._handlers[event])
-            this._handlers[event] = [];
-          handlerList = this._handlers[event];
-        }
-
-        for (k in c || {})
-          if (__allowedOptions[k])
-            bindingObject[k] = c[k];
-
-        if (bindingObject.once)
-          bindingObject.parent = this._handlers[event];
-
-        handlerList.push(bindingObject);
-      }
-
-    // Variant 3:
-    } else if (isPlainObject(a))
+    // Variant 3
+    if (isPlainObject(a)) {
       for (event in a)
         Emitter.prototype.on.call(this, event, a[event], b);
+      return this;
+    }
 
-    // Variant 4:
-    else if (typeof a === 'function') {
+    // Variant 1, 2 and 4
+    if (typeof a === 'function') {
+      c = b;
+      b = a;
+      a = null;
+    }
+
+    eArray = [].concat(a);
+
+    for (i = 0, l = eArray.length; i < l; i++) {
+      event = eArray[i];
+
       bindingObject = {
-        order: __order,
-        handler: a
+        order: __order++,
+        handler: b
       };
 
+      // Defining the list in which the handler should be inserted
+      if (typeof event === 'string') {
+        if (!this._handlers[event])
+          this._handlers[event] = [];
+        handlerList = this._handlers[event];
+      }
+      else if (event instanceof RegExp) {
+        handlerList = this._handlersComplex;
+        bindingObject.pattern = event;
+      }
+      else if (event === null) {
+        handlerList = this._handlersAll;
+      }
+      else {
+        throw Error('Emitter.on: invalid event.');
+      }
+
+      // Appending needed properties
       for (k in c || {})
         if (__allowedOptions[k])
           bindingObject[k] = c[k];
 
       if (bindingObject.once)
-        bindingObject.parent = this._handlersAll;
+        bindingObject.parent = handlerList;
 
-      this._handlersAll.push(bindingObject);
+      handlerList.push(bindingObject);
     }
-
-    // No matching variant:
-    else
-      throw new Error('Emitter.on: wrong arguments.');
 
     return this;
   };

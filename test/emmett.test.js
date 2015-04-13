@@ -150,6 +150,23 @@ describe('Emitter', function() {
 
       assert.strictEqual(count, 3);
     });
+
+    it('onces should be unbound in the correct order.', function() {
+      var count = 0,
+          ne = new emitter(),
+          callback = function() { count++; };
+
+      ne.once('event', callback);
+      ne.once('event', callback);
+
+      ne.emit('event');
+
+      assert.strictEqual(count, 2);
+
+      ne.emit('event');
+
+      assert.strictEqual(count, 2);
+    });
   });
 
   describe('api', function() {

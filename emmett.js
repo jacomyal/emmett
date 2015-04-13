@@ -167,7 +167,7 @@
     // Variant 3
     if (isPlainObject(a)) {
       for (event in a)
-        Emitter.prototype.on.call(this, event, a[event], b);
+        this.on.call(this, event, a[event], b);
       return this;
     }
 
@@ -349,7 +349,7 @@
     // Variant 3
     else if (isPlainObject(events)) {
       for (k in events)
-        Emitter.prototype.off.call(this, k, events[k]);
+        this.off.call(this, k, events[k]);
     }
 
     return this;
@@ -417,7 +417,7 @@
     if (isPlainObject(events)) {
 
       for (var k in events)
-        Emitter.prototype.emit.call(this, k, events[k]);
+        this.emit.call(this, k, events[k]);
 
       return this;
     }

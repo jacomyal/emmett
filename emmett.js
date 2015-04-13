@@ -161,7 +161,7 @@
         k,
         event,
         eArray,
-        handlerList,
+        handlersList,
         bindingObject;
 
     // Variant 3
@@ -192,14 +192,14 @@
       if (typeof event === 'string') {
         if (!this._handlers[event])
           this._handlers[event] = [];
-        handlerList = this._handlers[event];
+        handlersList = this._handlers[event];
       }
       else if (event instanceof RegExp) {
-        handlerList = this._handlersComplex;
+        handlersList = this._handlersComplex;
         bindingObject.pattern = event;
       }
       else if (event === null) {
-        handlerList = this._handlersAll;
+        handlersList = this._handlersAll;
       }
       else {
         throw Error('Emitter.on: invalid event.');
@@ -211,9 +211,9 @@
           bindingObject[k] = c[k];
 
       if (bindingObject.once)
-        bindingObject.parent = handlerList;
+        bindingObject.parent = handlersList;
 
-      handlerList.push(bindingObject);
+      handlersList.push(bindingObject);
     }
 
     return this;

@@ -12,9 +12,19 @@
     "url": "git@github.com:jacomyal/emmett"
   },
   "keywords": [
-    "events"
+    "events",
+    "emitter"
   ],
-  "author": "Alexis Jacomy",
+  "contributors": [
+    {
+      "name": "jacomyal",
+      "url": "https://github.com/jacomyal"
+    },
+    {
+      "name": "yomguithereal",
+      "url": "https://github.com/Yomguithereal"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jacomyal/emmett/issues"

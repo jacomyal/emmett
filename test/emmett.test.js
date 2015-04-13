@@ -285,7 +285,7 @@ describe('Emitter', function() {
 
       var m = function(hs) {
         return hs.map(function(h) {
-          return h.handler;
+          return h.fn;
         });
       };
 

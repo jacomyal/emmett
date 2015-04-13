@@ -164,7 +164,7 @@
 
       bindingObject = {
         order: __order++,
-        handler: b
+        fn: b
       };
 
       // Defining the list in which the handler should be inserted
@@ -264,7 +264,7 @@
    * @param  {string} event     The event we should unbind.
    * @return {Emitter}          Returns this.
    */
-  Emitter.prototype.off = function(events, handler) {
+  Emitter.prototype.off = function(events, fn) {
     var i,
         n,
         j,
@@ -275,13 +275,13 @@
 
     // Variant 4:
     if (arguments.length === 1 && typeof events === 'function') {
-      handler = arguments[0];
+      fn = arguments[0];
 
       // Handlers bound to events:
       for (k in this._handlers) {
         a = [];
         for (i = 0, n = this._handlers[k].length; i < n; i++)
-          if (this._handlers[k][i].handler !== handler)
+          if (this._handlers[k][i].fn !== fn)
             a.push(this._handlers[k][i]);
         this._handlers[k] = a;
 
@@ -292,14 +292,14 @@
       // Generic handlers
       a = [];
       for (i = 0, n = this._handlersAll.length; i < n; i++)
-        if (this._handlersAll[i].handler !== handler)
+        if (this._handlersAll[i].fn !== fn)
           a.push(this._handlersAll[i]);
       this._handlersAll = a;
 
       // Complex handlers
       a = [];
       for (i = 0, n = this._handlersComplex.length; i < n; i++)
-        if (this._handlersComplex[i].handler !== handler)
+        if (this._handlersComplex[i].fn !== fn)
           a.push(this._handlersComplex[i]);
       this._handlersComplex = a;
     }
@@ -318,7 +318,7 @@
         if (this._handlers[event]) {
           a = [];
           for (j = 0, m = this._handlers[event].length; j < m; j++)
-            if (this._handlers[event][j].handler !== handler)
+            if (this._handlers[event][j].fn !== fn)
               a.push(this._handlers[event][j]);
 
           this._handlers[event] = a;
@@ -430,7 +430,7 @@
         onces = [],
         event,
         handlers,
-        h,
+        handler,
         i,
         j,
         l,
@@ -440,7 +440,7 @@
       handlers = this.listeners(eArray[i]);
 
       for (j = 0, m = handlers.length; j < m; j++) {
-        h = handlers[j];
+        handler = handlers[j];
         event = {
           type: eArray[i],
           target: this
@@ -449,10 +449,10 @@
         if (arguments.length > 1)
           event.data = data;
 
-        h.handler.call('scope' in h ? h.scope : this, event);
+        handler.fn.call('scope' in handler ? handler.scope : this, event);
 
-        if (h.once)
-          onces.push(h);
+        if (handler.once)
+          onces.push(handler);
       }
 
       // Cleaning onces

@@ -367,6 +367,7 @@
    */
   Emitter.prototype.listeners = function(event) {
     var handlers = this._handlersAll || [],
+        complex = false,
         h,
         i,
         l;
@@ -379,12 +380,14 @@
     for (i = 0, l = this._handlersComplex.length; i < l; i++) {
       h = this._handlersComplex[i];
 
-      if (~event.search(h.pattern))
+      if (~event.search(h.pattern)) {
+        complex = true;
         handlers.push(h);
+      }
     }
 
     // If we have any complex handlers, we need to sort
-    if (this._handlersAll.length || this._handlersComplex.length)
+    if (this._handlersAll.length || complex)
       return handlers.sort(function(a, b) {
         return a.order - b.order;
       });

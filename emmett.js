@@ -58,9 +58,30 @@
    */
   var Emitter = function() {
     this._enabled = true;
+
+    // Dirty trick that will set the necessary properties to the emitter
+    this.unbindAll();
+  };
+
+  /**
+   * This method unbinds every handlers attached to every or any events. So,
+   * these functions will no more be executed when the related events are
+   * emitted. If the functions were not bound to the events, nothing will
+   * happen, and no error will be thrown.
+   *
+   * Usage:
+   * ******
+   * > myEmitter.unbindAll();
+   *
+   * @return {Emitter}      Returns this.
+   */
+  Emitter.prototype.unbindAll = function() {
+
     this._handlers = {};
     this._handlersAll = [];
     this._handlersComplex = [];
+
+    return this;
   };
 
 
@@ -334,30 +355,6 @@
       for (k in events)
         Emitter.prototype.off.call(this, k, events[k]);
     }
-
-    return this;
-  };
-
-
-  /**
-   * This method unbinds every handlers attached to every or any events. So,
-   * these functions will no more be executed when the related events are
-   * emitted. If the functions were not bound to the events, nothing will
-   * happen, and no error will be thrown.
-   *
-   * Usage:
-   * ******
-   * > myEmitter.unbindAll();
-   *
-   * @return {Emitter}      Returns this.
-   */
-  Emitter.prototype.unbindAll = function() {
-    var k;
-
-    this._handlersAll = [];
-    this._handlersComplex = [];
-    for (k in this._handlers)
-      delete this._handlers[k];
 
     return this;
   };

@@ -285,6 +285,20 @@
    * @param  {string} event     The event we should unbind.
    * @return {Emitter}          Returns this.
    */
+  function filter(target, fn) {
+    target = target || [];
+
+    var a = [],
+        l,
+        i;
+
+    for (i = 0, l = target.length; i < l; i++)
+      if (target[i].fn !== fn)
+        a.push(target[i]);
+
+    return a;
+  }
+
   Emitter.prototype.off = function(events, fn) {
     var i,
         n,
@@ -300,29 +314,17 @@
 
       // Handlers bound to events:
       for (k in this._handlers) {
-        a = [];
-        for (i = 0, n = this._handlers[k].length; i < n; i++)
-          if (this._handlers[k][i].fn !== fn)
-            a.push(this._handlers[k][i]);
-        this._handlers[k] = a;
+        this._handlers[k] = filter(this._handlers[k], fn);
 
         if (this._handlers[k].length === 0)
           delete this._handlers[k];
       }
 
-      // Generic handlers
-      a = [];
-      for (i = 0, n = this._handlersAll.length; i < n; i++)
-        if (this._handlersAll[i].fn !== fn)
-          a.push(this._handlersAll[i]);
-      this._handlersAll = a;
+      // Generic Handlers
+      this._handlersAll = filter(this._handlersAll, fn);
 
       // Complex handlers
-      a = [];
-      for (i = 0, n = this._handlersComplex.length; i < n; i++)
-        if (this._handlersComplex[i].fn !== fn)
-          a.push(this._handlersComplex[i]);
-      this._handlersComplex = a;
+      this._handlersComplex = filter(this._handlersComplex, fn);
     }
 
     // Variant 5
@@ -336,16 +338,10 @@
 
       for (i = 0, n = eArray.length; i < n; i++) {
         event = eArray[i];
-        if (this._handlers[event]) {
-          a = [];
-          for (j = 0, m = this._handlers[event].length; j < m; j++)
-            if (this._handlers[event][j].fn !== fn)
-              a.push(this._handlers[event][j]);
 
-          this._handlers[event] = a;
-        }
+        this._handlers[event] = filter(this._handlers[event], fn);
 
-        if (this._handlers[event] && this._handlers[event].length === 0)
+        if ((this._handlers[event] || []).length === 0)
           delete this._handlers[event];
       }
     }

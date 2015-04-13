@@ -6,7 +6,7 @@ describe('Emitter', function() {
     var count = 0,
         e = new emitter(),
         callback = function(e) {
-          count += e.data.count || 1;
+          count += (e.data || {}).count || 1;
         };
 
     it('unregistering event in emit callback should work', function() {

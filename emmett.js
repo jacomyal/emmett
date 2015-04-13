@@ -446,9 +446,6 @@
         l,
         m;
 
-    // Default data
-    data = (data === undefined) ? {} : data;
-
     for (i = 0, l = eArray.length; i < l; i++) {
       handlers = this.listeners(eArray[i]);
 
@@ -456,9 +453,11 @@
         h = handlers[j];
         event = {
           type: eArray[i],
-          data: data,
           target: this
         };
+
+        if (arguments.length > 1)
+          event.data = data;
 
         h.handler.call('scope' in h ? h.scope : this, event);
 

@@ -2,7 +2,7 @@
 
 A custom event emitter for Node.js and the browser.
 
-It aims at providing its user with a lot of event emitting sugar while remaining lightweight and fast.
+Its aim is to provide its user with a lot of event emitting sugar while remaining lightweight and fast.
 
 ## Installation
 
@@ -22,6 +22,31 @@ Or you can just drop the [`emmett.min.js`](./emmett.min.js) file in your project
 var Emitter = require('emmett');
 
 var emitter = new Emitter();
+```
+
+### Extending the emitter
+
+*Node.js*
+
+```js
+var util = require('util'),
+    Emitter = require('emmett');
+
+function MyObject() {
+	Emitter.call(this);
+}
+
+helpers.inherits(MyObject, Emitter);
+```
+
+*ES6 class*
+
+```js
+import Emitter from 'emmett';
+
+class MyObject extends Emitter {
+	/* ... */
+}
 ```
 
 ### Listening to events

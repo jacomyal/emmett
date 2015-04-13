@@ -452,7 +452,7 @@
       }
 
       // Cleaning onces
-      for (j = 0, m = onces.length; j < m; j++)
+      for (j = onces.length - 1; j >= 0; j--)
         onces[j].parent.splice(onces[j].parent.indexOf(onces[j]), 1);
     }
 

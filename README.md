@@ -36,7 +36,7 @@ function MyObject() {
 	Emitter.call(this);
 }
 
-helpers.inherits(MyObject, Emitter);
+util.inherits(MyObject, Emitter);
 ```
 
 *ES6 class*

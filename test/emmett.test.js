@@ -167,6 +167,27 @@ describe('Emitter', function() {
 
       assert.strictEqual(count, 2);
     });
+
+
+    it('make sure once only emits once after removeing callback', function() {
+      var count = 0,
+          ne = new emitter(),
+          callback1 = function () { count++; },
+          callback2 = function () { count++; };
+
+      ne.once('myEvent', callback1);
+      ne.once('myEvent', callback2);
+
+      ne.off('myEvent', callback1);
+
+      ne.emit('myEvent');
+      ne.emit('myEvent');
+
+      assert.equal(count, 1);
+      count = 0;
+    });
+
+
   });
 
   describe('api', function() {

@@ -302,10 +302,7 @@
   Emitter.prototype.off = function(events, fn) {
     var i,
         n,
-        j,
-        m,
         k,
-        a,
         event;
 
     // Variant 4:

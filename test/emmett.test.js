@@ -169,7 +169,7 @@ describe('Emitter', function() {
     });
 
 
-    it('make sure once only emits once after removeing callback', function() {
+    it('should only emit once in this edge case.', function() {
       var count = 0,
           ne = new emitter(),
           callback1 = function () { count++; },

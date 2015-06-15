@@ -193,6 +193,7 @@
         if (!this._handlers[event])
           this._handlers[event] = [];
         handlersList = this._handlers[event];
+        bindingObject.type = event;
       }
       else if (event instanceof RegExp) {
         handlersList = this._handlersComplex;
@@ -209,9 +210,6 @@
       for (k in c || {})
         if (__allowedOptions[k])
           bindingObject[k] = c[k];
-
-      if (bindingObject.once)
-        bindingObject.parent = handlersList;
 
       handlersList.push(bindingObject);
     }
@@ -422,6 +420,7 @@
     var eArray = [].concat(events),
         onces = [],
         event,
+        parent,
         handlers,
         handler,
         i,
@@ -449,8 +448,15 @@
       }
 
       // Cleaning onces
-      for (j = onces.length - 1; j >= 0; j--)
-        onces[j].parent.splice(onces[j].parent.indexOf(onces[j]), 1);
+      for (j = onces.length - 1; j >= 0; j--) {
+        parent = onces[j].type ?
+          this._handlers[onces[j].type] :
+          onces[j].pattern ?
+            this._handlersComplex :
+            this._handlersAll;
+
+        parent.splice(parent.indexOf(onces[j]), 1);
+      }
     }
 
     return this;

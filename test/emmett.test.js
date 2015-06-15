@@ -291,10 +291,6 @@ describe('Emitter', function() {
       e.kill();
       e.emit('myEvent');
       assert.equal(count, 1);
-
-      assert.throws(function() { e.child(); });
-      assert.throws(function() { e.on('myEvent', callback) });
-      assert.throws(function() { e.off('myEvent', callback) });
     });
   });
 

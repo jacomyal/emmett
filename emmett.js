@@ -474,6 +474,14 @@
     this._handlersAll = null;
     this._handlersComplex = null;
     this._enabled = false;
+
+    // Nooping methods
+    this.unbindAll =
+    this.on =
+    this.once =
+    this.off =
+    this.emit =
+    this.listeners = Function.prototype;
   };
 
 

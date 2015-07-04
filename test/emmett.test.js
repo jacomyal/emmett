@@ -151,6 +151,22 @@ describe('Emitter', function() {
       assert.strictEqual(count, 3);
     });
 
+    if ('Symbol' in global)
+      it('should be possible to bind symbols.', function() {
+        var count = 0,
+            ne = new emitter(),
+            callback = function() { count++; };
+
+        var s = Symbol('test');
+
+        ne.on(s, callback);
+        ne.emit(s);
+        ne.off(s, callback);
+        ne.emit(s);
+
+        assert.strictEqual(count, 1);
+      });
+
     it('onces should be unbound in the correct order.', function() {
       var count = 0,
           ne = new emitter(),

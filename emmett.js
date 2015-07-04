@@ -189,7 +189,7 @@
       };
 
       // Defining the list in which the handler should be inserted
-      if (typeof event === 'string') {
+      if (typeof event === 'string' || typeof event === 'symbol') {
         if (!this._handlers[event])
           this._handlers[event] = [];
         handlersList = this._handlers[event];
@@ -323,7 +323,8 @@
     }
 
     // Variant 5
-    else if (arguments.length === 1 && typeof events === 'string') {
+    else if (arguments.length === 1 &&
+             (typeof events === 'string' || typeof events === 'symbol')) {
       delete this._handlers[events];
     }
 

@@ -58,6 +58,10 @@ emitter.on('eventName', callback);
 // Once
 emitter.once('eventName', callback);
 
+// Using ES6 symbol as event name
+const sym = Symbol();
+emitter.on(sym, callback);
+
 // Matching event names with a regex
 emitter.on(/^event/, callback);
 

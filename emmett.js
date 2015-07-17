@@ -536,7 +536,7 @@
   /**
    * Version:
    */
-  Emitter.version = '3.1.0';
+  Emitter.version = '3.1.1';
 
 
   // Export:

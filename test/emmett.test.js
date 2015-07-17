@@ -151,7 +151,7 @@ describe('Emitter', function() {
       assert.strictEqual(count, 3);
     });
 
-    if ('Symbol' in global)
+    if ('Symbol' in global) {
       it('should be possible to bind symbols.', function() {
         var count = 0,
             ne = new emitter(),
@@ -166,6 +166,41 @@ describe('Emitter', function() {
 
         assert.strictEqual(count, 1);
       });
+
+      it('binding polymorphisms should also work with symbols.', function() {
+        var count = 0,
+            ne = new emitter(),
+            callback = function(e) {
+              if (e.data.nb)
+                count += e.data.nb;
+              else
+                count++;
+            };
+
+        var s1 = Symbol(),
+            s2 = Symbol();
+
+        var binding = {};
+        binding[s1] = callback;
+        binding[s2] = callback;
+
+        ne.on(binding);
+
+        var emitting = {};
+        emitting[s1] = {};
+        emitting[s2] = {nb: 2};
+
+        ne.emit(emitting);
+
+        assert.strictEqual(count, 3);
+
+        ne.off(binding);
+
+        ne.emit(emitting);
+
+        assert.strictEqual(count, 3);
+      });
+    }
 
     it('onces should be unbound in the correct order.', function() {
       var count = 0,

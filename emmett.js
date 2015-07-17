@@ -48,6 +48,30 @@
   }
 
   /**
+   * Iterate over an object that may have ES6 Symbols.
+   *
+   * @param  {object}   object  Object on which to iterate.
+   * @param  {function} fn      Iterator function.
+   * @param  {object}   [scope] Optional scope.
+   */
+  function forIn(object, fn, scope) {
+    var symbols,
+        k,
+        i,
+        l;
+
+    for (k in object)
+      fn.call(scope || null, k, object[k]);
+
+    if (Object.getOwnPropertySymbols) {
+      symbols = Object.getOwnPropertySymbols(object);
+
+      for (i = 0, l = symbols.length; i < l; i++)
+        fn.call(scope || null, symbols[i], object[symbols[i]]);
+    }
+  }
+
+  /**
    * The emitter's constructor. It initializes the handlers-per-events store and
    * the global handlers store.
    *
@@ -166,8 +190,10 @@
 
     // Variant 3
     if (isPlainObject(a)) {
-      for (event in a)
-        this.on(event, a[event], b);
+      forIn(a, function(name, fn) {
+        this.on(name, fn, b);
+      }, this);
+
       return this;
     }
 
@@ -344,8 +370,7 @@
 
     // Variant 3
     else if (isPlainObject(events)) {
-      for (k in events)
-        this.off(k, events[k]);
+      forIn(events, this.off, this);
     }
 
     return this;
@@ -411,10 +436,7 @@
 
     // Object variant
     if (isPlainObject(events)) {
-
-      for (var k in events)
-        this.emit(k, events[k]);
-
+      forIn(events, this.emit, this);
       return this;
     }
 

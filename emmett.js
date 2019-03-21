@@ -478,7 +478,8 @@
             this._handlersComplex :
             this._handlersAll;
 
-        parent.splice(parent.indexOf(onces[j]), 1);
+        const index = parent.indexOf(onces[j]);
+        index !== -1 && parent.splice(index, 1);
       }
     }
 

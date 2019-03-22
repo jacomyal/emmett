@@ -479,7 +479,9 @@
             this._handlersAll;
 
         const index = parent.indexOf(onces[j]);
-        index !== -1 && parent.splice(index, 1);
+        if (index !== -1) {
+          parent.splice(index, 1);
+        }
       }
     }
 

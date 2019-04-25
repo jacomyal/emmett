@@ -478,7 +478,7 @@
             this._handlersComplex :
             this._handlersAll;
 
-        const onceIndex = parent.indexOf(onces[j]);
+        var onceIndex = parent.indexOf(onces[j]);
         if (onceIndex !== -1) {
           parent.splice(onceIndex, 1);
         }

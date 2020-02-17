@@ -163,56 +163,54 @@ describe('Emitter', function() {
       assert.strictEqual(count, 3);
     });
 
-    if ('Symbol' in global) {
-      it('should be possible to bind symbols.', function() {
-        var count = 0,
-          ne = new Emitter(),
-          callback = function() {
-            count++;
-          };
+    it('should be possible to bind symbols.', function() {
+      var count = 0,
+        ne = new Emitter(),
+        callback = function() {
+          count++;
+        };
 
-        var s = Symbol('test');
+      var s = Symbol('test');
 
-        ne.on(s, callback);
-        ne.emit(s);
-        ne.off(s, callback);
-        ne.emit(s);
+      ne.on(s, callback);
+      ne.emit(s);
+      ne.off(s, callback);
+      ne.emit(s);
 
-        assert.strictEqual(count, 1);
-      });
+      assert.strictEqual(count, 1);
+    });
 
-      it('should work with all the different polymorphisms.', function() {
-        var count = 0,
-          ne = new Emitter(),
-          callback = function(e) {
-            if (e.data.nb) count += e.data.nb;
-            else count++;
-          };
+    it('should work with all the different polymorphisms.', function() {
+      var count = 0,
+        ne = new Emitter(),
+        callback = function(e) {
+          if (e.data.nb) count += e.data.nb;
+          else count++;
+        };
 
-        var s1 = Symbol(),
-          s2 = Symbol();
+      var s1 = Symbol(),
+        s2 = Symbol();
 
-        var binding = {};
-        binding[s1] = callback;
-        binding[s2] = callback;
+      var binding = {};
+      binding[s1] = callback;
+      binding[s2] = callback;
 
-        ne.on(binding);
+      ne.on(binding);
 
-        var emitting = {};
-        emitting[s1] = {};
-        emitting[s2] = {nb: 2};
+      var emitting = {};
+      emitting[s1] = {};
+      emitting[s2] = {nb: 2};
 
-        ne.emit(emitting);
+      ne.emit(emitting);
 
-        assert.strictEqual(count, 3);
+      assert.strictEqual(count, 3);
 
-        ne.off(binding);
+      ne.off(binding);
 
-        ne.emit(emitting);
+      ne.emit(emitting);
 
-        assert.strictEqual(count, 3);
-      });
-    }
+      assert.strictEqual(count, 3);
+    });
 
     it('onces should be unbound in the correct order.', function() {
       var count = 0,

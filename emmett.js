@@ -557,7 +557,7 @@ Emitter.prototype.enable = function() {
 /**
  * Version:
  */
-Emitter.version = '3.1.3';
+Emitter.version = '3.2.0';
 
 
 /**

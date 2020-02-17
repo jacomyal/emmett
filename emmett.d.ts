@@ -7,7 +7,7 @@ export interface EmmettOptions {
 
 export interface Event {
   data: any;
-  type: string;
+  type: EventName;
   target: Emitter;
 }
 

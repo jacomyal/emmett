@@ -198,7 +198,7 @@
       return this;
     }
 
-    // Variant 1, 2 and 4
+    // Variant 4
     if (typeof a === 'function') {
       c = b;
       b = a;
@@ -335,8 +335,13 @@
     if (arguments.length === 1 && typeof events === 'function') {
       fn = arguments[0];
 
+      var keys = Object.keys(this._handlers)
+        .concat(Object.getOwnPropertySymbols(this._handlers));
+
       // Handlers bound to events:
-      for (k in this._handlers) {
+      for (i = 0; i < keys.length; i++) {
+        k = keys[i];
+
         this._handlers[k] = filter(this._handlers[k], fn);
 
         if (this._handlers[k].length === 0)

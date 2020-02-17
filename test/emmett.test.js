@@ -212,6 +212,23 @@ describe('Emitter', function() {
       assert.strictEqual(count, 3);
     });
 
+    it('should work with #off and symbols (regression #28).', function() {
+      var count = 0,
+        ne = new Emitter(),
+        callback = function() {
+          count++;
+        };
+
+      var s = Symbol('test');
+
+      ne.on(s, callback);
+      ne.emit(s);
+      ne.off(callback);
+      ne.emit(s);
+
+      assert.strictEqual(count, 1);
+    });
+
     it('onces should be unbound in the correct order.', function() {
       var count = 0,
         ne = new Emitter(),

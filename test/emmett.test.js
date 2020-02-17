@@ -1,129 +1,139 @@
 var assert = require('assert'),
-    emitter = require('../emmett.js');
+  Emitter = require('../emmett.js');
 
 describe('Emitter', function() {
-  describe('events emission', function() {
-    var count = 0,
-        e = new emitter(),
-        callback = function(e) {
-          count += (e.data || {}).count || 1;
-        };
+  describe('Events emission', function() {
+    var mainCount = 0,
+      emitter = new Emitter(),
+      mainCallback = function(event) {
+        mainCount += (event.data || {}).count || 1;
+      };
 
     it('unregistering event in emit callback should work', function() {
-      var callback = function () {
-        e.off('myEvent', callback);
-        count++;
+      var callback = function() {
+        emitter.off('myEvent', callback);
+        mainCount++;
       };
-      e.on('myEvent', callback);
-      e.emit('myEvent');
-      e.emit('myEvent');
-      assert.equal(count, 1);
-      count = 0;
+      emitter.on('myEvent', callback);
+      emitter.emit('myEvent');
+      emitter.emit('myEvent');
+      assert.equal(mainCount, 1);
+      mainCount = 0;
     });
 
     it('unregistering other event in emit callback should work', function() {
-      var callback = function () {
-        e.off('myEvent2', callback);
-        count++;
+      var callback = function() {
+        emitter.off('myEvent2', callback);
+        mainCount++;
       };
-      e.once('myEvent', callback);
-      e.on('myEvent2', callback);
-      e.emit('myEvent');
-      e.emit('myEvent2');
-      assert.equal(count, 1);
-      count = 0;
+      emitter.once('myEvent', callback);
+      emitter.on('myEvent2', callback);
+      emitter.emit('myEvent');
+      emitter.emit('myEvent2');
+      assert.equal(mainCount, 1);
+      mainCount = 0;
     });
 
     it('dispatching an event with no trigger does nothing', function() {
-      e.emit('myEvent');
-      assert.equal(count, 0);
-      count = 0;
+      emitter.emit('myEvent');
+      assert.equal(mainCount, 0);
+      mainCount = 0;
     });
 
     it('dispatching an event with a trigger executes the callback', function() {
-      e.on('myEvent', callback);
-      e.emit('myEvent');
-      assert.equal(count, 1);
-      count = 0;
+      emitter.on('myEvent', mainCallback);
+      emitter.emit('myEvent');
+      assert.equal(mainCount, 1);
+      mainCount = 0;
     });
 
     it('data should effectively be given to the callback', function() {
-      e.emit('myEvent', { count: 2 });
-      assert.equal(count, 2);
-      count = 0;
+      emitter.emit('myEvent', {count: 2});
+      assert.equal(mainCount, 2);
+      mainCount = 0;
     });
 
     it('dispatching an event with a trigger than has been unbound does nothing', function() {
-      e.off('myEvent', callback);
-      e.emit('myEvent');
-      assert.equal(count, 0);
-      count = 0;
+      emitter.off('myEvent', mainCallback);
+      emitter.emit('myEvent');
+      assert.equal(mainCount, 0);
+      mainCount = 0;
     });
 
     it('binding a function with "once" set to true should work only once', function() {
-      e.once('myOnceEvent', callback);
-      e.emit('myOnceEvent');
-      assert.equal(count, 1);
-      e.emit('myOnceEvent');
-      assert.equal(count, 1);
-      count = 0;
+      emitter.once('myOnceEvent', mainCallback);
+      emitter.emit('myOnceEvent');
+      assert.equal(mainCount, 1);
+      emitter.emit('myOnceEvent');
+      assert.equal(mainCount, 1);
+      mainCount = 0;
     });
 
     it('handlers should be fired using the emitter\'s scope', function() {
-      e.on('initEvent', function() {
+      emitter.on('initEvent', function() {
         this.emit('scopeEvent');
       });
-      e.on('scopeEvent', callback);
-      e.emit('initEvent');
-      assert.strictEqual(count, 1);
+      emitter.on('scopeEvent', mainCallback);
+      emitter.emit('initEvent');
+      assert.strictEqual(mainCount, 1);
     });
 
     it('handlers should be fired using custom scope if given', function() {
-      e.on('customScopeEvent', function() {
-        assert.deepEqual(this, { a: 1, b: 2 });
-      }, { scope: { a: 1, b: 2 } });
-      e.emit('customScopeEvent');
+      emitter.on(
+        'customScopeEvent',
+        function() {
+          assert.deepEqual(this, {a: 1, b: 2});
+        },
+        {scope: {a: 1, b: 2}}
+      );
+      emitter.emit('customScopeEvent');
     });
 
     it('handlers should be fired using custom scope if given (with emmett#on(object))', function() {
-      e.on(
-        { customScopeEvent2: function() {
-            assert.deepEqual(this, { a: 1, b: 2 });
-          } },
-        { scope: { a: 1, b: 2 } }
+      emitter.on(
+        {
+          customScopeEvent2: function() {
+            assert.deepEqual(this, {a: 1, b: 2});
+          }
+        },
+        {scope: {a: 1, b: 2}}
       );
-      e.emit('customScopeEvent2');
+      emitter.emit('customScopeEvent2');
     });
 
     it('should work with both "once" and "scope" used', function() {
-      var scope = { a: 0 };
-      e.on(
+      var scope = {a: 0};
+      emitter.on(
         'myOnceEvent',
-        function() { this.a++ },
-        { scope: scope, once: true }
+        function() {
+          this.a++;
+        },
+        {scope: scope, once: true}
       );
-      e.emit('myOnceEvent');
+      emitter.emit('myOnceEvent');
       assert.equal(scope.a, 1);
-      e.emit('myOnceEvent');
+      emitter.emit('myOnceEvent');
       assert.equal(scope.a, 1);
     });
 
     it('should work with a "scope" used with the #once method', function() {
-      var scope = { a: 0 };
-      e.once(
+      var scope = {a: 0};
+      emitter.once(
         'myOnceEvent',
-        function() { this.a++ },
-        { scope: scope }
+        function() {
+          this.a++;
+        },
+        {scope: scope}
       );
-      e.emit('myOnceEvent');
+      emitter.emit('myOnceEvent');
       assert.equal(scope.a, 1);
-      e.emit('myOnceEvent');
+      emitter.emit('myOnceEvent');
       assert.equal(scope.a, 1);
     });
 
     it('should guarantee binding order.', function() {
       var results = [],
-          ne = new emitter();
+        ne = new Emitter();
 
       ne.on('event', function() {
         results.push(1);
@@ -139,8 +149,10 @@ describe('Emitter', function() {
 
     it('should be possible to bind regexes.', function() {
       var count = 0,
-          ne = new emitter(),
-          callback = function() { count++; };
+        ne = new Emitter(),
+        callback = function() {
+          count++;
+        };
 
       ne.on(/^event/, callback);
       ne.on(/event\d+/, callback);
@@ -154,8 +166,10 @@ describe('Emitter', function() {
     if ('Symbol' in global) {
       it('should be possible to bind symbols.', function() {
         var count = 0,
-            ne = new emitter(),
-            callback = function() { count++; };
+          ne = new Emitter(),
+          callback = function() {
+            count++;
+          };
 
         var s = Symbol('test');
 
@@ -167,18 +181,16 @@ describe('Emitter', function() {
         assert.strictEqual(count, 1);
       });
 
-      it('binding polymorphisms should also work with symbols.', function() {
+      it('should work with all the different polymorphisms.', function() {
         var count = 0,
-            ne = new emitter(),
-            callback = function(e) {
-              if (e.data.nb)
-                count += e.data.nb;
-              else
-                count++;
-            };
+          ne = new Emitter(),
+          callback = function(e) {
+            if (e.data.nb) count += e.data.nb;
+            else count++;
+          };
 
         var s1 = Symbol(),
-            s2 = Symbol();
+          s2 = Symbol();
 
         var binding = {};
         binding[s1] = callback;
@@ -204,8 +216,10 @@ describe('Emitter', function() {
 
     it('onces should be unbound in the correct order.', function() {
       var count = 0,
-          ne = new emitter(),
-          callback = function() { count++; };
+        ne = new Emitter(),
+        callback = function() {
+          count++;
+        };
 
       ne.once('event', callback);
       ne.once('event', callback);
@@ -219,12 +233,15 @@ describe('Emitter', function() {
       assert.strictEqual(count, 2);
     });
 
-
     it('should only emit once in this edge case.', function() {
       var count = 0,
-          ne = new emitter(),
-          callback1 = function () { count++; },
-          callback2 = function () { count++; };
+        ne = new Emitter(),
+        callback1 = function() {
+          count++;
+        },
+        callback2 = function() {
+          count++;
+        };
 
       ne.once('myEvent', callback1);
       ne.once('myEvent', callback2);
@@ -237,15 +254,15 @@ describe('Emitter', function() {
       assert.equal(count, 1);
       count = 0;
     });
-
-
   });
 
-  describe('api', function() {
+  describe('API', function() {
     it('unbind polymorphisms should work', function() {
       var count = 0,
-          e = new emitter(),
-          callback = function() { count++; };
+        e = new Emitter(),
+        callback = function() {
+          count++;
+        };
 
       e.on('myEvent', callback);
       e.off('myEvent', callback);
@@ -280,10 +297,14 @@ describe('Emitter', function() {
 
     it('bind polymorphisms should work', function() {
       var count1 = 0,
-          count2 = 0,
-          e = new emitter(),
-          callback1 = function() { count1++; },
-          callback2 = function() { count2++; };
+        count2 = 0,
+        e = new Emitter(),
+        callback1 = function() {
+          count1++;
+        },
+        callback2 = function() {
+          count2++;
+        };
 
       e.on('myEvent1', callback1);
       e.emit('myEvent1');
@@ -306,7 +327,7 @@ describe('Emitter', function() {
       count1 = 0;
       count2 = 0;
 
-      e.on({ myEvent1: callback1, myEvent2: callback2 });
+      e.on({myEvent1: callback1, myEvent2: callback2});
       e.emit('myEvent1');
       e.emit('myEvent2');
       assert.deepEqual([count1, count2], [1, 1]);
@@ -317,8 +338,10 @@ describe('Emitter', function() {
 
     it('emit polymorphism should work.', function() {
       var count = 0,
-          callback = function(e) { count += e.data; },
-          e = new emitter();
+        callback = function(e) {
+          count += e.data;
+        },
+        e = new Emitter();
 
       e.on('event1', callback);
       e.on('event2', callback);
@@ -333,8 +356,10 @@ describe('Emitter', function() {
 
     it('killing an instance should work', function() {
       var count = 0,
-          callback = function() { count++; },
-          e = (new emitter()).on('myEvent', callback);
+        callback = function() {
+          count++;
+        },
+        e = new Emitter().on('myEvent', callback);
 
       e.emit('myEvent');
       assert.equal(count, 1);
@@ -345,10 +370,12 @@ describe('Emitter', function() {
     });
   });
 
-  describe('enabling / disabling', function() {
+  describe('Enabling / disabling', function() {
     var count = 0,
-        callback = function() { count++; },
-        e = (new emitter()).on('myEvent', callback);
+      callback = function() {
+        count++;
+      },
+      e = new Emitter().on('myEvent', callback);
 
     it('should stop emiting events when disabled', function() {
       e.disable();
@@ -365,8 +392,8 @@ describe('Emitter', function() {
 
   describe('Retrieving listeners', function() {
     it('should be possible to retrieve an emitter\'s listeners', function() {
-      var ee = new emitter(),
-          fn = function test() {};
+      var ee = new Emitter(),
+        fn = function test() {};
 
       var m = function(hs) {
         return hs.map(function(h) {

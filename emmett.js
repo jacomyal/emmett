@@ -130,28 +130,28 @@
    * > // Or:
    * > myEmitter.on('myEvent', function(e) { console.log(e); }, { once: true });
    *
-   * @param  {string}   event   The event to listen to.
-   * @param  {function} handler The function to bind.
-   * @param  {?object}  options Eventually some options.
-   * @return {Emitter}          Returns this.
+   * @param  {EventName} event   The event to listen to.
+   * @param  {Handler}   handler The function to bind.
+   * @param  {?object}   options Some options.
+   * @return {Emitter}           Returns this.
    *
    * Variant 2:
    * **********
    * > myEmitter.on(
    * >   ['myEvent1', 'myEvent2'],
    * >   function(e) { console.log(e); }
-   * >);
+   * > );
    * > // Or:
    * > myEmitter.on(
    * >   ['myEvent1', 'myEvent2'],
    * >   function(e) { console.log(e); }
    * >   { once: true }}
-   * >);
+   * > );
    *
-   * @param  {array}    events  The events to listen to.
-   * @param  {function} handler The function to bind.
-   * @param  {?object}  options Eventually some options.
-   * @return {Emitter}          Returns this.
+   * @param  {EventName[]} events  The events to listen to.
+   * @param  {Handler}     handler The function to bind.
+   * @param  {?object}     options Some options.
+   * @return {Emitter}             Returns this.
    *
    * Variant 3:
    * **********
@@ -165,19 +165,20 @@
    * >   myEvent2: function(e) { console.log(e); }
    * > }, { once: true });
    *
-   * @param  {object}  bindings An object containing pairs event / function.
-   * @param  {?object}  options Eventually some options.
-   * @return {Emitter}          Returns this.
+   * @param  {Object<EventName, Handler>} bindings An object containing
+   *                                               pairs event / function.
+   * @param  {?object}                    options  Some options.
+   * @return {Emitter}                             Returns this.
    *
    * Variant 4:
    * **********
    * > myEmitter.on(function(e) { console.log(e); });
    * > // Or:
-   * > myEmitter.on(function(e) { console.log(e); }, { once: true});
+   * > myEmitter.on(function(e) { console.log(e); }, { once: true });
    *
-   * @param  {function} handler The function to bind to every events.
-   * @param  {?object}  options Eventually some options.
-   * @return {Emitter}          Returns this.
+   * @param  {Handler} handler The function to bind to every events.
+   * @param  {?object} options Some options.
+   * @return {Emitter}         Returns this.
    */
   Emitter.prototype.on = function(a, b, c) {
     var i,
@@ -273,17 +274,17 @@
    * **********
    * > myEmitter.off('myEvent', myHandler);
    *
-   * @param  {string}   event   The event to unbind the handler from.
-   * @param  {function} handler The function to unbind.
-   * @return {Emitter}          Returns this.
+   * @param  {EventName} event   The event to unbind the handler from.
+   * @param  {Handler}   handler The function to unbind.
+   * @return {Emitter}           Returns this.
    *
    * Variant 2:
    * **********
    * > myEmitter.off(['myEvent1', 'myEvent2'], myHandler);
    *
-   * @param  {array}    events  The events to unbind the handler from.
-   * @param  {function} handler The function to unbind.
-   * @return {Emitter}          Returns this.
+   * @param  {EventName[]} events  The events to unbind the handler from.
+   * @param  {Handler}     handler The function to unbind.
+   * @return {Emitter}             Returns this.
    *
    * Variant 3:
    * **********
@@ -292,22 +293,23 @@
    * >   myEvent2: myHandler2
    * > });
    *
-   * @param  {object} bindings An object containing pairs event / function.
-   * @return {Emitter}         Returns this.
+   * @param  {Object<EventName, Handler>} bindings An object containing pairs
+   *                                               event / function.
+   * @return {Emitter}                             Returns this.
    *
    * Variant 4:
    * **********
    * > myEmitter.off(myHandler);
    *
-   * @param  {function} handler The function to unbind from every events.
-   * @return {Emitter}          Returns this.
+   * @param  {Handler} handler The function to unbind from every events.
+   * @return {Emitter}         Returns this.
    *
    * Variant 5:
    * **********
    * > myEmitter.off(event);
    *
-   * @param  {string} event     The event we should unbind.
-   * @return {Emitter}          Returns this.
+   * @param  {EventName} event The event we should unbind.
+   * @return {Emitter}         Returns this.
    */
   function filter(target, fn) {
     target = target || [];
@@ -379,8 +381,8 @@
   /**
    * This method retrieve the listeners attached to a particular event.
    *
-   * @param  {?string}    Name of the event.
-   * @return {array}      Array of handler functions.
+   * @param  {?EventName} event Name of the event.
+   * @return {array}            Array of handler functions.
    */
   Emitter.prototype.listeners = function(event) {
     var handlers = this._handlersAll || [],
@@ -416,17 +418,30 @@
    * This method emits the specified event(s), and executes every handlers bound
    * to the event(s).
    *
-   * Use cases:
+   * Variant 1:
    * **********
    * > myEmitter.emit('myEvent');
    * > myEmitter.emit('myEvent', myData);
+   *
+   * @param  {EventName} event The event to emit.
+   * @param  {object?}   data  Some data.
+   * @return {Emitter}         Returns this.
+   *
+   * Variant 2:
+   * **********
    * > myEmitter.emit(['myEvent1', 'myEvent2']);
    * > myEmitter.emit(['myEvent1', 'myEvent2'], myData);
+   *
+   * @param  {EventName[]} events The events to emit.
+   * @param  {object?}     data   Some data.
+   * @return {Emitter}            Returns this.
+   *
+   * Variant 3:
+   * **********
    * > myEmitter.emit({myEvent1: myData1, myEvent2: myData2});
    *
-   * @param  {string|array} events The event(s) to emit.
-   * @param  {object?}      data   The data.
-   * @return {Emitter}             Returns this.
+   * @param  {Object<EventName, any>} events The events to emit.
+   * @return {Emitter}                       Returns this.
    */
   Emitter.prototype.emit = function(events, data) {
 
@@ -472,11 +487,12 @@
 
       // Cleaning onces
       for (j = onces.length - 1; j >= 0; j--) {
-        parent = onces[j].type ?
-          this._handlers[onces[j].type] :
-          onces[j].pattern ?
-            this._handlersComplex :
-            this._handlersAll;
+        if (onces[j].type)
+          parent = this._handlers[onces[j].type];
+        else if (onces[j].pattern)
+          parent = this._handlersComplex;
+        else
+          parent = this._handlersAll;
 
         var onceIndex = parent.indexOf(onces[j]);
         if (onceIndex !== -1) {
@@ -547,7 +563,8 @@
     if (typeof module !== 'undefined' && module.exports)
       exports = module.exports = Emitter;
     exports.Emitter = Emitter;
-  } else if (typeof define === 'function' && define.amd)
+  }
+  else if (typeof define === 'function' && define.amd)
     define('emmett', [], function() {
       return Emitter;
     });

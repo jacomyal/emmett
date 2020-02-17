@@ -12,8 +12,6 @@ You can install **Emmett** through npm:
 npm install --save emmett
 ```
 
-Or you can just drop the [`emmett.min.js`](./emmett.min.js) file in your project (will work with many popular module systems).
-
 ## Usage
 
 ### Creating an emitter
@@ -180,9 +178,6 @@ npm install
 # Running unit tests
 npm test
 
-# Build a minified version
-npm build
-
 # Lint the code
-gulp lint
+npm run lint
 ```

@@ -404,7 +404,7 @@
     for (i = 0, l = this._handlersComplex.length; i < l; i++) {
       h = this._handlersComplex[i];
 
-      if (~event.search(h.pattern)) {
+      if (typeof event === 'string' && ~event.search(h.pattern)) {
         complex = true;
         handlers.push(h);
       }

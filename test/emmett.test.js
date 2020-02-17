@@ -229,6 +229,15 @@ describe('Emitter', function() {
       assert.strictEqual(count, 1);
     });
 
+    it('should work with symbols and complex handlers (regression #29).', function() {
+      var ne = new Emitter();
+
+      ne.on(/some pattern/, function() {});
+      ne.emit(Symbol('test'));
+
+      assert.ok(true);
+    });
+
     it('onces should be unbound in the correct order.', function() {
       var count = 0,
         ne = new Emitter(),
